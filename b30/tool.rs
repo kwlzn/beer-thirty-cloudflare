@@ -1,5 +1,5 @@
 use clap::Parser;
-use untappd::get_beer_rating;
+use lib::{get_beer_rating, get_beerthirty_json};
 
 /// Search for a beer's rating on Untappd
 #[derive(Parser, Debug)]
@@ -13,6 +13,8 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-        let rating = get_beer_rating(&args.beer_name).await;
+    let json_url = get_beerthirty_json().await;
+    let rating = get_beer_rating(&args.beer_name).await;
+    println!("Menu JSON: {}", json_url);
     println!("Rating for '{}': {}", args.beer_name, rating);
 }
