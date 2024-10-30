@@ -9,7 +9,7 @@ use std::error::Error;
 use url::Url;
 
 
-// static LANGUAGE: &str = "Rust";
+static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
 
 
 #[derive(Debug)]
@@ -42,7 +42,7 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     let client = reqwest::Client::new();
     let response = client
         .get("http://www.taphunter.com/bigscreen/5469327503392768")
-        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        .header("User-Agent", USER_AGENT)
         .send()
         .await
         .map_err(|e| format!("HTTP request failed: {}", e))?;
@@ -108,7 +108,7 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
     let client = reqwest::Client::new();
     let response = client
         .get(url.as_str())
-        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        .header("User-Agent", USER_AGENT)
         .send()
         .await
         .map_err(|e| format!("HTTP request failed: {}", e))?;
