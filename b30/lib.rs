@@ -247,7 +247,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
     // let ratings = fetch_untappd_ratings(&entries).await;
 
     // Create DataFrame
-    let df = DataFrame::new(vec![
+    let mut df = DataFrame::new(vec![
         Series::new("tap", tap_numbers),
         Series::new("brewery", breweries),
         Series::new("name", names),
@@ -258,6 +258,12 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         Series::new("days old", days_old),
         // Series::new("untappd rating", ratings),
     ])?;
+
+    df.sort_in_place(
+        ["category", "abv"],
+        false,
+        true
+    );
 
     Ok(df)
 }
