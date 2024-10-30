@@ -226,7 +226,10 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
 
         // Remove "**Nitro**" from brewery and name
         entry.brewery = entry.brewery.replace("**Nitro**", "").trim().to_string();
-        entry.name = entry.name.replace("**Nitro**", "").trim().to_string();
+        entry.name = entry.name.replace("Nitro", "").replace("**Nitro**", "").trim().to_string();
+
+        // Remove Brewery name from beer name (if duplicated).
+        entry.name = entry.name.replace(&entry.brewery, "").trim().to_string();
 
         entries.push(entry);
     }
@@ -255,7 +258,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         Series::new("category", categories),
         Series::new("origin", origins),
         Series::new("style", styles),
-        Series::new("days old", days_old),
+        Series::new("age", days_old),
         // Series::new("untappd rating", ratings),
     ])?;
 
@@ -330,6 +333,7 @@ fn clean_text(text: &str) -> String {
     text.split_whitespace()
         .collect::<Vec<&str>>()
         .join(" ")
+        .replace(" ,", ",")
         .trim()
         .to_string()
 }
