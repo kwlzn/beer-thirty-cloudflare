@@ -248,7 +248,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
 
     // Create DataFrame
     let df = DataFrame::new(vec![
-        Series::new("tap number", tap_numbers),
+        Series::new("tap", tap_numbers),
         Series::new("brewery", breweries),
         Series::new("name", names),
         Series::new("abv", abvs),
@@ -265,29 +265,32 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
 // Converts a Dataframe into an HTML string for output.
 pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     let mut html = String::from(r#"
-        <style>
-            table { 
-                border-collapse: collapse; 
-                width: 100%; 
-                margin: 20px 0;
-                font-family: Arial, sans-serif;
-            }
-            th, td { 
-                border: 1px solid #ddd; 
-                padding: 8px; 
-                text-align: left;
-            }
-            th { 
-                background-color: #f2f2f2;
-                font-weight: bold;
-            }
-            tr:nth-child(even) { 
-                background-color: #f9f9f9;
-            }
-            tr:hover {
-                background-color: #f5f5f5;
-            }
-        </style>
+<head>
+  <style>
+    table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+    }
+    th, td { 
+        border: 1px solid #ddd; 
+        padding: 8px; 
+        text-align: left;
+    }
+    th { 
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    tr:nth-child(even) { 
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
     "#);
 
     html.push_str("<table>\n<thead>\n<tr>");
@@ -310,6 +313,9 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     }
 
     html.push_str("</tbody>\n</table>");
+
+    html.push_str("</body>");
+
     Ok(html)
 }
 
