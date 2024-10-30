@@ -1,5 +1,5 @@
 use clap::Parser;
-use lib::{get_beer_rating, get_beerthirty_json};
+use lib::*;
 
 /// Search for a beer's rating on Untappd
 #[derive(Parser, Debug)]
@@ -14,7 +14,10 @@ struct Args {
 async fn main() {
     let args = Args::parse();
     let json_url = get_beerthirty_json().await;
-    let rating = get_beer_rating(&args.beer_name).await;
+    // let rating = get_beer_rating(&args.beer_name).await;
+    // println!("Rating for '{}': {}", args.beer_name, rating);
     println!("Menu JSON: {}", json_url);
-    println!("Rating for '{}': {}", args.beer_name, rating);
+    let df = b30_json_to_dataframe(&json_url).await;
+    let df_html = dataframe_to_html(&df.unwrap());
+    println!("{}", df_html.unwrap());
 }

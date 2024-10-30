@@ -1,8 +1,30 @@
+use chrono::NaiveDateTime;
+use futures::stream::{self, StreamExt};
+use polars::prelude::*;
+use regex::Regex;
 use reqwest;
+use serde_json::Value;
 use soup::prelude::*;
 use std::error::Error;
-use regex::Regex;
 use url::Url;
+
+
+// static LANGUAGE: &str = "Rust";
+
+
+#[derive(Debug)]
+struct BeerEntry {
+    tap_number: i32,
+    brewery: String,
+    name: String,
+    abv: String,
+    category: String,
+    origin: String,
+    style: String,
+    days_old: String,
+    untappd_rating: String,
+}
+
 
 pub async fn get_beerthirty_json() -> String {
     match get_beerthirty_json_internal().await {
@@ -13,6 +35,7 @@ pub async fn get_beerthirty_json() -> String {
         }
     }
 }
+
 
 async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     // Fetch the main page
@@ -44,27 +67,27 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     
     // Look through each script tag for the getJSON pattern
     for script in scripts {
-        if let content = script.text() {
-            if content.contains("getJSON") {
-                if let Some(captures) = re.captures(&content) {
-                    // Get the relative path from the regex capture
-                    let relative_path = captures
-                        .get(2)
-                        .ok_or("Failed to capture JSON path")?
-                        .as_str();
-                    
-                    // Construct the full URL
-                    return Ok(format!(
-                        "http://www.taphunter.com/bigscreen/json/{}",
-                        relative_path
-                    ));
-                }
+        let content = script.text();
+        if content.contains("getJSON") {
+            if let Some(captures) = re.captures(&content) {
+                // Get the relative path from the regex capture
+                let relative_path = captures
+                    .get(2)
+                    .ok_or("Failed to capture JSON path")?
+                    .as_str();
+                
+                // Construct the full URL
+                return Ok(format!(
+                    "http://www.taphunter.com/bigscreen/json/{}",
+                    relative_path
+                ));
             }
         }
     }
     
     Err("Could not find getJSON URL in any script tag".into())
 }
+
 
 pub async fn get_beer_rating(search_string: &str) -> String {
     match get_beer_rating_internal(search_string).await {
@@ -75,6 +98,7 @@ pub async fn get_beer_rating(search_string: &str) -> String {
         }
     }
 }
+
 
 async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn Error>> {
     let base_url = "https://untappd.com/search";
@@ -136,6 +160,168 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
     
     Ok(result)
 }
+
+
+fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
+    // Parse the date string into a NaiveDateTime
+    let date = NaiveDateTime::parse_from_str(
+        &format!("{} 00:00:00", date_str),
+        "%m/%d/%Y %H:%M:%S"
+    )?;
+    
+    // Get current time
+    let now = chrono::Local::now().naive_local();
+    
+    // Calculate the difference in days
+    let days_old = (now - date).num_days();
+    
+    Ok(days_old)
+}
+
+
+// async fn fetch_untappd_ratings(entries: &Vec<BeerEntry>) -> Vec<String> {
+//     // Process ratings concurrently with a limit of 5 simultaneous requests
+//     const CONCURRENT_REQUESTS: usize = 5;
+    
+//     // Create owned search strings before starting futures
+//     let search_strings: Vec<String> = entries.iter()
+//         .map(|entry| format!("{} {}", entry.brewery, entry.name))
+//         .collect();
+    
+//     let rating_futures = search_strings.into_iter().map(|search_string| {
+//         get_beer_rating_internal(search_string)
+//     });
+
+//     let ratings: Vec<String> = stream::iter(rating_futures)
+//         .buffer_unordered(CONCURRENT_REQUESTS)
+//         .map(|result| result.unwrap_or_else(|_| "N/A".to_string()))
+//         .collect()
+//         .await;
+
+//     ratings
+// }
+
+pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error>> {
+    // Fetch JSON data
+    let response = reqwest::get(url).await?.text().await?;
+    let json: Vec<Value> = serde_json::from_str(&response)?;
+
+    // Process each entry
+    let mut entries = Vec::new();
+    for item in json {
+        let date_str = item["date_added"].as_str().unwrap_or("").to_string();
+        let days_old = calculate_days_old(&date_str)?;
+
+        let mut entry = BeerEntry {
+            tap_number: item["serving_info"]["tap_number"].as_i64().unwrap_or(0) as i32,
+            brewery: clean_text(&item["brewery"]["common_name"].as_str().unwrap_or("")),
+            name: clean_text(&item["beer"]["beer_name"].as_str().unwrap_or("")),
+            abv: clean_text(&item["beer"]["abv"].as_str().unwrap_or("")),
+            category: clean_text(&item["beer"]["style_category"].as_str().unwrap_or("")),
+            origin: clean_text(&item["brewery"]["origin"].as_str().unwrap_or("")),
+            style: clean_text(&item["beer"]["style"].as_str().unwrap_or("")),
+            days_old: days_old.to_string(),
+            untappd_rating: String::new(), // Will be populated later
+        };
+
+        // Remove "**Nitro**" from brewery and name
+        entry.brewery = entry.brewery.replace("**Nitro**", "").trim().to_string();
+        entry.name = entry.name.replace("**Nitro**", "").trim().to_string();
+
+        entries.push(entry);
+    }
+
+    // Create vectors for each column
+    let tap_numbers: Vec<i32> = entries.iter().map(|e| e.tap_number).collect();
+    let breweries: Vec<String> = entries.iter().map(|e| e.brewery.clone()).collect();
+    let names: Vec<String> = entries.iter().map(|e| e.name.clone()).collect();
+    let abvs: Vec<String> = entries.iter().map(|e| e.abv.clone()).collect();
+    let categories: Vec<String> = entries.iter().map(|e| e.category.clone()).collect();
+    let origins: Vec<String> = entries.iter().map(|e| e.origin.clone()).collect();
+    let styles: Vec<String> = entries.iter().map(|e| e.style.clone()).collect();
+    let days_old: Vec<i64> = entries.iter()
+        .map(|e| e.days_old.parse::<i64>().unwrap_or(0))
+        .collect();
+
+    // Fetch all Untappd ratings concurrently
+    // let ratings = fetch_untappd_ratings(&entries).await;
+
+    // Create DataFrame
+    let df = DataFrame::new(vec![
+        Series::new("tap number", tap_numbers),
+        Series::new("brewery", breweries),
+        Series::new("name", names),
+        Series::new("abv", abvs),
+        Series::new("category", categories),
+        Series::new("origin", origins),
+        Series::new("style", styles),
+        Series::new("days old", days_old),
+        // Series::new("untappd rating", ratings),
+    ])?;
+
+    Ok(df)
+}
+
+// Converts a Dataframe into an HTML string for output.
+pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
+    let mut html = String::from(r#"
+        <style>
+            table { 
+                border-collapse: collapse; 
+                width: 100%; 
+                margin: 20px 0;
+                font-family: Arial, sans-serif;
+            }
+            th, td { 
+                border: 1px solid #ddd; 
+                padding: 8px; 
+                text-align: left;
+            }
+            th { 
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }
+            tr:nth-child(even) { 
+                background-color: #f9f9f9;
+            }
+            tr:hover {
+                background-color: #f5f5f5;
+            }
+        </style>
+    "#);
+
+    html.push_str("<table>\n<thead>\n<tr>");
+    
+    // Add headers
+    for name in df.get_column_names() {
+        html.push_str(&format!("<th>{}</th>", name));
+    }
+    html.push_str("</tr>\n</thead>\n<tbody>\n");
+
+    // Add rows
+    let height = df.height();
+    for row in 0..height {
+        html.push_str("<tr>");
+        for col in df.get_columns() {
+            let cell = col.get(row).unwrap();
+            html.push_str(&format!("<td>{}</td>", cell));
+        }
+        html.push_str("</tr>\n");
+    }
+
+    html.push_str("</tbody>\n</table>");
+    Ok(html)
+}
+
+
+fn clean_text(text: &str) -> String {
+    text.split_whitespace()
+        .collect::<Vec<&str>>()
+        .join(" ")
+        .trim()
+        .to_string()
+}
+
 
 #[cfg(test)]
 mod tests {
