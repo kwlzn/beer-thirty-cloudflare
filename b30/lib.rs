@@ -6,10 +6,14 @@ use reqwest;
 use serde_json::Value;
 use soup::prelude::*;
 use std::error::Error;
+use worker::{event, Context, Env, Request, Response};
 use url::Url;
 
 
-static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+const CONCURRENT_REQUESTS: usize = 5;
+const BASE_TAPHUNTER_URL: &str = "http://www.taphunter.com/bigscreen";
+const BASE_UNTAPPD_URL: &str = "https://untappd.com";
 
 
 #[derive(Debug)]
@@ -23,6 +27,16 @@ struct BeerEntry {
     style: String,
     days_old: String,
     // untappd_rating: String,
+}
+
+
+fn clean_text(text: &str) -> String {
+    text.split_whitespace()
+        .collect::<Vec<&str>>()
+        .join(" ")
+        .replace(" ,", ",")
+        .trim()
+        .to_string()
 }
 
 
@@ -41,7 +55,7 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     // Fetch the main page
     let client = reqwest::Client::new();
     let response = client
-        .get("http://www.taphunter.com/bigscreen/5469327503392768")
+        .get(format!("{}/5469327503392768", BASE_TAPHUNTER_URL))
         .header("User-Agent", USER_AGENT)
         .send()
         .await
@@ -78,7 +92,8 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
                 
                 // Construct the full URL
                 return Ok(format!(
-                    "http://www.taphunter.com/bigscreen/json/{}",
+                    "{}/json/{}",
+                    BASE_TAPHUNTER_URL,
                     relative_path
                 ));
             }
@@ -100,14 +115,16 @@ pub async fn get_beer_rating(search_string: &str) -> String {
 }
 
 
+// TODO: Cache this with https://docs.rs/worker-kv/0.7.0/worker_kv/index.html with a 1 week TTL.
 async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn Error>> {
-    let base_url = "https://untappd.com/search";
-    let url = Url::parse_with_params(base_url, &[("q", search_string)])
-        .map_err(|e| format!("URL parsing failed: {}", e))?;
-    
+    let url = Url::parse_with_params(
+        &format!("{}/search", BASE_UNTAPPD_URL),
+        &[("q", search_string)]
+    ).map_err(|e| Box::new(e) as Box<dyn Error>);
+
     let client = reqwest::Client::new();
     let response = client
-        .get(url.as_str())
+        .get(url?.as_str())
         .header("User-Agent", USER_AGENT)
         .send()
         .await
@@ -152,13 +169,12 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
         .get("data-rating")
         .ok_or("HTML parsing: Could not find data-rating attribute")?;
     
-    // Construct the full URL
-    let full_url = format!("https://untappd.com{}", relative_url);
-    
-    // Create the HTML anchor tag with the rating as text
-    let result = format!("<a href=\"{}\">{}</a>", full_url, rating);
-    
-    Ok(result)
+    Ok(format!(
+        "<a href=\"{}{}\">{}</a>",
+        BASE_UNTAPPD_URL,
+        relative_url,
+        rating
+    ))
 }
 
 
@@ -179,9 +195,7 @@ fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
 }
 
 
-async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box<dyn Error>> {
-    const CONCURRENT_REQUESTS: usize = 5;
-    
+async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box<dyn Error>> {    
     // Create owned search strings with their indices
     let search_strings: Vec<(usize, String)> = entries.iter()
         .enumerate()
@@ -482,13 +496,15 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     Ok(html)
 }
 
-fn clean_text(text: &str) -> String {
-    text.split_whitespace()
-        .collect::<Vec<&str>>()
-        .join(" ")
-        .replace(" ,", ",")
-        .trim()
-        .to_string()
+
+// Cloudflare worker main entrypoint.
+#[event(fetch)]
+async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
+    let json_url = get_beerthirty_json().await;
+    let df = b30_json_to_dataframe(&json_url).await;
+    let df_html = dataframe_to_html(&df.unwrap());
+
+    Ok(Response::ok(format!("{}", df_html.unwrap()))?)
 }
 
 
