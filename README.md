@@ -12,7 +12,23 @@ In particular, this worker:
 
 # Dev Usage
 
-## Table Output
+## Server
+
+### Run a local Cloudflare dev server
+
+```
+$ npx wrangler dev
+```
+
+### Deploy to Cloudflare
+
+```
+$ npx wrangler deploy
+```
+
+## CLI Tool (For Development Only)
+
+## HTML Writer
 
 ```
 $ cargo run > test.html && open test.html
@@ -23,16 +39,4 @@ $ cargo run > test.html && open test.html
 ```
 $ cargo run "Pliny the Elder" 2>/dev/null
 Rating for 'Pliny the Elder': <a href="https://untappd.com/beer/4499">4.494</a>
-```
-
-## Run a local Cloudflare dev server
-
-```
-$ npx wrangler dev
-```
-
-## Deploy to Cloudflare
-
-```
-$ npx wrangler deploy
 ```
