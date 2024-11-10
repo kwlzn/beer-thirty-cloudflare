@@ -312,6 +312,22 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     tr:hover {
         background-color: #f5f5f5;
     }
+    .abv-low {
+        background-color: #1a9850;
+        color: black;
+    }
+    .abv-medium-low {
+        background-color: #91cf60;
+        color: black;
+    }
+    .abv-medium {
+        background-color: #fee08b;
+        color: black;
+    }
+    .abv-high {
+        background-color: #fc8d59;
+        color: black;
+    }
   </style>
 </head>
 <body>
@@ -325,26 +341,41 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     }
     html.push_str("</tr>\n</thead>\n<tbody>\n");
 
+    // Get column indices for looking up values
+    let abv_idx = df.get_column_names().iter().position(|&name| name == "abv")
+        .ok_or("ABV column not found")?;
+
     // Add rows
     let height = df.height();
     for row in 0..height {
         html.push_str("<tr>");
-        for col in df.get_columns() {
+        for (col_idx, col) in df.get_columns().iter().enumerate() {
             let cell = col.get(row).unwrap();
-            // Remove quotes from string values
             let cell_str = format!("{}", cell);
             let cleaned_value = if cell_str.starts_with('"') && cell_str.ends_with('"') {
                 &cell_str[1..cell_str.len() - 1]
             } else {
                 &cell_str
             };
-            html.push_str(&format!("<td>{}</td>", cleaned_value));
+
+            // Apply color coding for ABV column
+            if col_idx == abv_idx {
+                let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
+                let class_name = match abv_value {
+                    x if x < 6.0 => "abv-low",
+                    x if x < 6.5 => "abv-medium-low",
+                    x if x < 7.0 => "abv-medium",
+                    _ => "abv-high",
+                };
+                html.push_str(&format!("<td class=\"{}\">{}</td>", class_name, cleaned_value));
+            } else {
+                html.push_str(&format!("<td>{}</td>", cleaned_value));
+            }
         }
         html.push_str("</tr>\n");
     }
 
     html.push_str("</tbody>\n</table>");
-
     html.push_str("</body>");
 
     Ok(html)
