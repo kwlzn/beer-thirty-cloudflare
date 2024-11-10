@@ -282,7 +282,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         Series::new("origin", origins),
         Series::new("style", styles),
         Series::new("age", days_old),
-        Series::new("untappd rating", ratings),
+        Series::new("rating", ratings),
     ])?;
 
     df.sort_in_place(
@@ -314,6 +314,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     th { 
         background-color: #f2f2f2;
         font-weight: bold;
+        text-align: center !important;  /* Force center alignment for all headers */
     }
     tr:nth-child(even) td:not(.category-cell) { 
         background-color: #f9f9f9;
@@ -360,13 +361,9 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
     html.push_str("<table>\n<thead>\n<tr>");
     
-    // Add headers with appropriate alignment
+    // Add headers - no longer need class for alignment since all headers are centered via CSS
     for name in df.get_column_names() {
-        let class_attr = match name {
-            "tap" | "abv" | "age" | "untappd rating" => " class=\"numeric\"",
-            _ => "",
-        };
-        html.push_str(&format!("<th{}>{}</th>", class_attr, name));
+        html.push_str(&format!("<th>{}</th>", name));
     }
     html.push_str("</tr>\n</thead>\n<tbody>\n");
 
@@ -456,7 +453,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
                 }
 
                 let column_name = df.get_column_names()[col_idx];
-                let is_numeric = matches!(column_name, "tap" | "age" | "untappd rating");
+                let is_numeric = matches!(column_name, "tap" | "age" | "rating");
 
                 if col_idx == abv_idx {
                     let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
