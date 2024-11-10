@@ -1,0 +1,17 @@
+name = "b30-worker"
+main = "b30/lib.rs"
+compatibility_date = "2022-07-12"
+workers_dev = false
+route = { pattern = "aliveasfuck.com/b30", zone_name = "aliveasfuck.com" }
+kv_namespaces = [
+  { binding = "b30", id = "adadc32345c843b4b760da73d6186f6a" }
+]
+
+
+# [env.staging]
+# name = "my-worker-staging"
+# route = { pattern = "staging.example.org/*", zone_name = "example.org" }
+#
+# kv_namespaces = [
+#   { binding = "<MY_NAMESPACE>", id = "<STAGING_KV_ID>" }
+# ]
