@@ -497,9 +497,9 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 }
 
 
-// Cloudflare worker main entrypoint.
+// Cloudflare worker main fetch entrypoint.
 #[event(fetch)]
-async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
+async fn cloudflare_fetch(_req: Request, _env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
     let json_url = get_beerthirty_json().await;
     let df = b30_json_to_dataframe(&json_url).await;
     let df_html = dataframe_to_html(&df.unwrap());
