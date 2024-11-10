@@ -331,7 +331,14 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
         html.push_str("<tr>");
         for col in df.get_columns() {
             let cell = col.get(row).unwrap();
-            html.push_str(&format!("<td>{}</td>", cell));
+            // Remove quotes from string values
+            let cell_str = format!("{}", cell);
+            let cleaned_value = if cell_str.starts_with('"') && cell_str.ends_with('"') {
+                &cell_str[1..cell_str.len() - 1]
+            } else {
+                &cell_str
+            };
+            html.push_str(&format!("<td>{}</td>", cleaned_value));
         }
         html.push_str("</tr>\n");
     }
