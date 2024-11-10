@@ -1,5 +1,6 @@
 name = "b30-worker"
-main = "b30/lib.rs"
+# N.B. This is created by `worker-build`.
+main = "build/package.json"
 compatibility_date = "2022-07-12"
 workers_dev = false
 route = { pattern = "aliveasfuck.com/b30", zone_name = "aliveasfuck.com" }

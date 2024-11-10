@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use futures::stream::{self, StreamExt};
-use polars::prelude::*;
+use polars_core::prelude::*;
+use polars_lazy::prelude::*;
 use regex::Regex;
 use reqwest;
 use serde_json::Value;

@@ -21,6 +21,13 @@ $ cargo run > test.html && open test.html
 ## Beer Rating/URL Fetch
 
 ```
-$ om:beer-thirty-cloudflare kw$ cargo run "Pliny the Elder" 2>/dev/null
+$ cargo run "Pliny the Elder" 2>/dev/null
 Rating for 'Pliny the Elder': <a href="https://untappd.com/beer/4499">4.494</a>
+```
+
+## Building and Deploying to Cloudflare
+
+```
+$ worker-build
+$ npx wrangler deploy
 ```
