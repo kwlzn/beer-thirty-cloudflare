@@ -241,7 +241,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
 
         // Remove "**Nitro**" from brewery and name
         entry.brewery = entry.brewery.replace("**Nitro**", "").trim().to_string();
-        entry.name = entry.name.replace("Nitro", "").replace("**Nitro**", "").trim().to_string();
+        entry.name = entry.name.replace("**NITRO**", "").replace("Nitro", "").replace("**Nitro**", "").trim().to_string();
 
         // Remove Brewery name from beer name (if duplicated).
         entry.name = entry.name.replace(&entry.brewery, "").trim().to_string();
