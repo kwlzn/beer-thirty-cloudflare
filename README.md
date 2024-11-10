@@ -10,3 +10,17 @@ In particular, this worker:
 4. Sorts within the group by ABV and heatmaps the ABV column.
 5. Renders this in a table for easy tap selection.
 
+# Dev Usage
+
+## Table Output
+
+```
+$ cargo run > test.html && open test.html
+```
+
+## Beer Rating/URL Fetch
+
+```
+$ om:beer-thirty-cloudflare kw$ cargo run "Pliny the Elder" 2>/dev/null
+Rating for 'Pliny the Elder': <a href="https://untappd.com/beer/4499">4.494</a>
+```
