@@ -231,7 +231,15 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
             tap_number: item["serving_info"]["tap_number"].as_i64().unwrap_or(0) as i32,
             brewery: clean_text(&item["brewery"]["common_name"].as_str().unwrap_or("")),
             name: clean_text(&item["beer"]["beer_name"].as_str().unwrap_or("")),
-            abv: clean_text(&item["beer"]["abv"].as_str().unwrap_or("")),
+            // Convert empty ABV to "0.0%"
+            abv: {
+                let abv = clean_text(&item["beer"]["abv"].as_str().unwrap_or(""));
+                if abv.is_empty() {
+                    "0.0".to_string()
+                } else {
+                    abv
+                }
+            },
             category: clean_text(&item["beer"]["style_category"].as_str().unwrap_or("")),
             origin: clean_text(&item["brewery"]["origin"].as_str().unwrap_or("")),
             style: clean_text(&item["beer"]["style"].as_str().unwrap_or("")),
@@ -301,16 +309,30 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
         border: 1px solid #ddd; 
         padding: 8px; 
         text-align: left;
+        vertical-align: middle;
     }
     th { 
         background-color: #f2f2f2;
         font-weight: bold;
     }
-    tr:nth-child(even) { 
+    tr:nth-child(even) td:not(.category-cell) { 
         background-color: #f9f9f9;
     }
-    tr:hover {
+    tr:nth-child(odd) td:not(.category-cell) { 
+        background-color: #ffffff;
+    }
+    tr:hover td:not(.category-cell) {
         background-color: #f5f5f5;
+    }
+    .category-cell {
+        font-weight: bold;
+        text-align: center;
+    }
+    .category-cell-even {
+        background-color: #e6f3ff !important;
+    }
+    .category-cell-odd {
+        background-color: #ffffff !important;
     }
     .abv-low {
         background-color: #1a9850;
@@ -331,7 +353,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
   </style>
 </head>
 <body>
-    "#);
+"#);
 
     html.push_str("<table>\n<thead>\n<tr>");
     
@@ -341,14 +363,19 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     }
     html.push_str("</tr>\n</thead>\n<tbody>\n");
 
-    // Get column indices for looking up values
     let abv_idx = df.get_column_names().iter().position(|&name| name == "abv")
         .ok_or("ABV column not found")?;
+    let category_idx = df.get_column_names().iter().position(|&name| name == "category")
+        .ok_or("Category column not found")?;
 
-    // Add rows
     let height = df.height();
+    let mut current_category = String::new();
+    let mut row_number = 0;
+    let mut category_number = 0;  // New counter specifically for categories
+    
     for row in 0..height {
-        html.push_str("<tr>");
+        let mut row_started = false;
+        
         for (col_idx, col) in df.get_columns().iter().enumerate() {
             let cell = col.get(row).unwrap();
             let cell_str = format!("{}", cell);
@@ -358,21 +385,88 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
                 &cell_str
             };
 
-            // Apply color coding for ABV column
-            if col_idx == abv_idx {
-                let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
-                let class_name = match abv_value {
-                    x if x < 6.0 => "abv-low",
-                    x if x < 6.5 => "abv-medium-low",
-                    x if x < 7.0 => "abv-medium",
-                    _ => "abv-high",
+            // Handle category column
+            if col_idx == category_idx {
+                let normalized_value = if cleaned_value.trim().is_empty() {
+                    "(Uncategorized)"
+                } else {
+                    cleaned_value
                 };
-                html.push_str(&format!("<td class=\"{}\">{}</td>", class_name, cleaned_value));
+
+                if normalized_value != &current_category {
+                    let mut count = 1;
+                    for future_row in (row + 1)..height {
+                        let future_cell = df.get_columns()[category_idx].get(future_row).unwrap();
+                        let future_value = format!("{}", future_cell);
+                        let future_cleaned = if future_value.starts_with('"') && future_value.ends_with('"') {
+                            &future_value[1..future_value.len() - 1]
+                        } else {
+                            &future_value
+                        };
+                        let future_normalized = if future_cleaned.trim().is_empty() {
+                            "(Uncategorized)"
+                        } else {
+                            future_cleaned
+                        };
+                        if future_normalized == normalized_value {
+                            count += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if !row_started {
+                        html.push_str("<tr>");
+                        row_started = true;
+                    }
+
+                    let category_class = if category_number % 2 == 0 {
+                        "category-cell category-cell-even"
+                    } else {
+                        "category-cell category-cell-odd"
+                    };
+                    
+                    let display_value = if normalized_value == "(Uncategorized)" {
+                        ""
+                    } else {
+                        normalized_value
+                    };
+
+                    html.push_str(&format!(
+                        "<td class=\"{}\" rowspan=\"{}\">{}</td>",
+                        category_class,
+                        count,
+                        display_value
+                    ));
+                    
+                    current_category = normalized_value.to_string();
+                    category_number += 1;  // Increment category counter when category changes
+                }
             } else {
-                html.push_str(&format!("<td>{}</td>", cleaned_value));
+                if !row_started {
+                    html.push_str("<tr>");
+                    row_started = true;
+                }
+
+                if col_idx == abv_idx {
+                    let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
+                    let class_name = match abv_value {
+                        x if x < 6.0 => "abv-low",
+                        x if x < 6.5 => "abv-medium-low",
+                        x if x < 7.0 => "abv-medium",
+                        _ => "abv-high",
+                    };
+                    html.push_str(&format!("<td class=\"{}\">{}</td>", class_name, cleaned_value));
+                } else {
+                    html.push_str(&format!("<td>{}</td>", cleaned_value));
+                }
             }
         }
-        html.push_str("</tr>\n");
+
+        if row_started {
+            html.push_str("</tr>\n");
+            row_number += 1;
+        }
     }
 
     html.push_str("</tbody>\n</table>");
