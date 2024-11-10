@@ -231,7 +231,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
             tap_number: item["serving_info"]["tap_number"].as_i64().unwrap_or(0) as i32,
             brewery: clean_text(&item["brewery"]["common_name"].as_str().unwrap_or("")),
             name: clean_text(&item["beer"]["beer_name"].as_str().unwrap_or("")),
-            // Convert empty ABV to "0.0%"
+            // Convert empty ABV to "0.0".
             abv: {
                 let abv = clean_text(&item["beer"]["abv"].as_str().unwrap_or(""));
                 if abv.is_empty() {
@@ -329,25 +329,25 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
         text-align: center;
     }
     .category-cell-even {
-        background-color: #f0f6fc !important;
+        background-color: #f0f6fc;
     }
     .category-cell-odd {
-        background-color: #ffffff !important;
+        background-color: #ffffff;
     }
     .abv-low {
-        background-color: #1a9850;
+        background-color: #1a9850 !important;
         color: black;
     }
     .abv-medium-low {
-        background-color: #91cf60;
+        background-color: #91cf60 !important;
         color: black;
     }
     .abv-medium {
-        background-color: #fee08b;
+        background-color: #fee08b !important;
         color: black;
     }
     .abv-high {
-        background-color: #fc8d59;
+        background-color: #fc8d59 !important;
         color: black;
     }
   </style>
