@@ -334,6 +334,9 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     .category-cell-odd {
         background-color: #ffffff;
     }
+    .numeric {
+        text-align: right;
+    }
     .abv-low {
         background-color: #1a9850 !important;
         color: black;
@@ -357,9 +360,13 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
     html.push_str("<table>\n<thead>\n<tr>");
     
-    // Add headers
+    // Add headers with appropriate alignment
     for name in df.get_column_names() {
-        html.push_str(&format!("<th>{}</th>", name));
+        let class_attr = match name {
+            "tap" | "abv" | "age" | "untappd rating" => " class=\"numeric\"",
+            _ => "",
+        };
+        html.push_str(&format!("<th{}>{}</th>", class_attr, name));
     }
     html.push_str("</tr>\n</thead>\n<tbody>\n");
 
@@ -371,7 +378,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     let height = df.height();
     let mut current_category = String::new();
     let mut row_number = 0;
-    let mut category_number = 0;  // New counter specifically for categories
+    let mut category_number = 0;
     
     for row in 0..height {
         let mut row_started = false;
@@ -440,7 +447,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
                     ));
                     
                     current_category = normalized_value.to_string();
-                    category_number += 1;  // Increment category counter when category changes
+                    category_number += 1;
                 }
             } else {
                 if !row_started {
@@ -448,15 +455,20 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
                     row_started = true;
                 }
 
+                let column_name = df.get_column_names()[col_idx];
+                let is_numeric = matches!(column_name, "tap" | "age" | "untappd rating");
+
                 if col_idx == abv_idx {
                     let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
                     let class_name = match abv_value {
-                        x if x < 6.0 => "abv-low",
-                        x if x < 6.5 => "abv-medium-low",
-                        x if x < 7.0 => "abv-medium",
-                        _ => "abv-high",
+                        x if x < 6.0 => "abv-low numeric",
+                        x if x < 6.5 => "abv-medium-low numeric",
+                        x if x < 7.0 => "abv-medium numeric",
+                        _ => "abv-high numeric",
                     };
                     html.push_str(&format!("<td class=\"{}\">{}</td>", class_name, cleaned_value));
+                } else if is_numeric {
+                    html.push_str(&format!("<td class=\"numeric\">{}</td>", cleaned_value));
                 } else {
                     html.push_str(&format!("<td>{}</td>", cleaned_value));
                 }
@@ -474,7 +486,6 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
     Ok(html)
 }
-
 
 fn clean_text(text: &str) -> String {
     text.split_whitespace()
