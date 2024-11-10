@@ -22,7 +22,7 @@ struct BeerEntry {
     origin: String,
     style: String,
     days_old: String,
-    untappd_rating: String,
+    // untappd_rating: String,
 }
 
 
@@ -244,7 +244,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
             origin: clean_text(&item["brewery"]["origin"].as_str().unwrap_or("")),
             style: clean_text(&item["beer"]["style"].as_str().unwrap_or("")),
             days_old: days_old.to_string(),
-            untappd_rating: String::new(), // Will be populated later
+            // untappd_rating: String::new(), // Will be populated later
         };
 
         // Remove "**Nitro**" from brewery and name
@@ -289,7 +289,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         ["category", "abv"],
         false,
         true
-    );
+    ).map_err(|e| Box::new(e) as Box<dyn Error>)?;
 
     Ok(df)
 }
@@ -374,7 +374,6 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
     let height = df.height();
     let mut current_category = String::new();
-    let mut row_number = 0;
     let mut category_number = 0;
     
     for row in 0..height {
@@ -474,7 +473,6 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
         if row_started {
             html.push_str("</tr>\n");
-            row_number += 1;
         }
     }
 
