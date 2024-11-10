@@ -1,13 +1,12 @@
 use chrono::NaiveDateTime;
 use futures::stream::{self, StreamExt};
 use polars_core::prelude::*;
-use polars_lazy::prelude::*;
 use regex::Regex;
 use reqwest;
 use serde_json::Value;
 use soup::prelude::*;
 use std::error::Error;
-use worker::{event, Context, Env, Request, Response};
+use worker::{event, Context, Env, Request, Response, Router};
 use url::Url;
 
 
@@ -500,12 +499,29 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
 // Cloudflare worker main fetch entrypoint.
 #[event(fetch)]
-async fn cloudflare_fetch(_req: Request, _env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
-    let json_url = get_beerthirty_json().await;
-    let df = b30_json_to_dataframe(&json_url).await;
-    let df_html = dataframe_to_html(&df.unwrap());
+async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
+    let router = Router::new();
+    println!("Hello");
+    Ok(
+        router
+        .get_async("/b30", |_req, _ctx| async move {
+            let json_url = get_beerthirty_json().await;
+            let df = b30_json_to_dataframe(&json_url).await;
+            let df_html = dataframe_to_html(&df.unwrap());
+            Ok(Response::from_html(format!("{}", df_html.unwrap()))?)
 
-    Ok(Response::ok(format!("{}", df_html.unwrap()))?)
+            // if let Some(id) = ctx.param("id") {
+            //     let accounts = ctx.kv("ACCOUNTS")?;
+            //     return match accounts.get(id).json::<Account>().await? {
+            //         Some(account) => Response::from_json(&account),
+            //         None => Response::error("Not found", 404),
+            //     };
+            // }
+
+            // Response::error("Bad Request", 400)
+        })
+        .run(req, env).await?
+    )
 }
 
 
