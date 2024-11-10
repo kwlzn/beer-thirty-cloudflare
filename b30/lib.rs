@@ -274,11 +274,11 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
 
     // Create DataFrame
     let mut df = DataFrame::new(vec![
+        Series::new("category", categories),
         Series::new("tap", tap_numbers),
         Series::new("brewery", breweries),
         Series::new("name", names),
         Series::new("abv", abvs),
-        Series::new("category", categories),
         Series::new("origin", origins),
         Series::new("style", styles),
         Series::new("age", days_old),
@@ -329,7 +329,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
         text-align: center;
     }
     .category-cell-even {
-        background-color: #e6f3ff !important;
+        background-color: #f0f6fc !important;
     }
     .category-cell-odd {
         background-color: #ffffff !important;
