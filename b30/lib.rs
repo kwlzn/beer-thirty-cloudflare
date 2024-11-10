@@ -179,27 +179,42 @@ fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
 }
 
 
-// async fn fetch_untappd_ratings(entries: &Vec<BeerEntry>) -> Vec<String> {
-//     // Process ratings concurrently with a limit of 5 simultaneous requests
-//     const CONCURRENT_REQUESTS: usize = 5;
+async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box<dyn Error>> {
+    const CONCURRENT_REQUESTS: usize = 5;
     
-//     // Create owned search strings before starting futures
-//     let search_strings: Vec<String> = entries.iter()
-//         .map(|entry| format!("{} {}", entry.brewery, entry.name))
-//         .collect();
+    // Create owned search strings with their indices
+    let search_strings: Vec<(usize, String)> = entries.iter()
+        .enumerate()
+        .map(|(idx, entry)| (idx, format!("{} {}", entry.brewery, entry.name)))
+        .collect();
     
-//     let rating_futures = search_strings.into_iter().map(|search_string| {
-//         get_beer_rating_internal(search_string)
-//     });
+    // Create a vector to store results with proper capacity
+    let mut ratings = vec!["".to_string(); entries.len()];
+    
+    // Process requests while preserving order
+    let results: Vec<(usize, String)> = stream::iter(search_strings)
+        .map(|(idx, search_string)| async move {
+            let rating = match get_beer_rating_internal(&search_string).await {
+                Ok(rating) => rating,
+                Err(e) => {
+                    eprintln!("Error fetching rating for '{}': {}", search_string, e);
+                    "N/A".to_string()
+                }
+            };
+            (idx, rating)
+        })
+        .buffer_unordered(CONCURRENT_REQUESTS)
+        .collect()
+        .await;
+    
+    // Place results in the correct positions
+    for (idx, rating) in results {
+        ratings[idx] = rating;
+    }
 
-//     let ratings: Vec<String> = stream::iter(rating_futures)
-//         .buffer_unordered(CONCURRENT_REQUESTS)
-//         .map(|result| result.unwrap_or_else(|_| "N/A".to_string()))
-//         .collect()
-//         .await;
+    Ok(ratings)
+}
 
-//     ratings
-// }
 
 pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error>> {
     // Fetch JSON data
@@ -247,7 +262,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         .collect();
 
     // Fetch all Untappd ratings concurrently
-    // let ratings = fetch_untappd_ratings(&entries).await;
+    let ratings = fetch_untappd_ratings(&entries).await?;
 
     // Create DataFrame
     let mut df = DataFrame::new(vec![
@@ -259,7 +274,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         Series::new("origin", origins),
         Series::new("style", styles),
         Series::new("age", days_old),
-        // Series::new("untappd rating", ratings),
+        Series::new("untappd rating", ratings),
     ])?;
 
     df.sort_in_place(
