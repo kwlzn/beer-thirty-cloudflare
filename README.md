@@ -25,9 +25,14 @@ $ cargo run "Pliny the Elder" 2>/dev/null
 Rating for 'Pliny the Elder': <a href="https://untappd.com/beer/4499">4.494</a>
 ```
 
-## Building and Deploying to Cloudflare
+## Run a local Cloudflare dev server
 
 ```
-$ worker-build
+$ npx wrangler dev
+```
+
+## Deploy to Cloudflare
+
+```
 $ npx wrangler deploy
 ```
