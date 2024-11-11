@@ -108,7 +108,6 @@ pub async fn get_beer_rating(search_string: &str) -> String {
     }
 }
 
-// TODO: Cache this with https://docs.rs/worker-kv/0.7.0/worker_kv/index.html with a 1 week TTL.
 async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn Error>> {
     let url = Url::parse_with_params(
         &format!("{}/search", BASE_UNTAPPD_URL),
@@ -164,7 +163,7 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
 
 async fn fetch_untappd_ratings(entries: &[BeerEntry], kv: &KvStore) -> Result<Vec<String>, Box<dyn Error>> {
     let mut ratings = vec!["".to_string(); entries.len()];
-    
+
     // Process entries concurrently while preserving order
     let results: Vec<(usize, String)> = stream::iter(entries.iter().enumerate())
         .map(|(idx, entry)| async move {
@@ -178,29 +177,29 @@ async fn fetch_untappd_ratings(entries: &[BeerEntry], kv: &KvStore) -> Result<Ve
             // If not in cache, fetch from Untappd
             let search_string = format!("{} {}", entry.brewery, entry.name);
             let rating = match get_beer_rating_internal(&search_string).await {
-                Ok(rating) => {
-                    // Store in cache with TTL
-                    if let Err(e) = kv.put(&cache_key, rating.clone())
-                        .expect("Failed to create PUT object")
-                        .expiration_ttl(CACHE_TTL_SECONDS)
-                        .execute()
-                        .await
-                    {
-                        console_log!("Failed to cache rating for '{}': {}", search_string, e);
-                    }
-                    rating
-                },
+                Ok(rating) => rating,
                 Err(e) => {
                     console_log!("Error fetching rating for '{}': {}", search_string, e);
                     "N/A".to_string()
                 }
             };
+
+            // Store in cache with TTL - including non-existent results
+            if let Err(e) = kv.put(&cache_key, rating.clone())
+                .expect("Failed to create PUT object")
+                .expiration_ttl(CACHE_TTL_SECONDS)
+                .execute()
+                .await
+            {
+                console_log!("Failed to cache rating for '{}': {}", search_string, e);
+            }
+
             (idx, rating)
         })
         .buffer_unordered(CONCURRENT_REQUESTS)
         .collect()
         .await;
-    
+
     // Place results in the correct positions
     for (idx, rating) in results {
         ratings[idx] = rating;
