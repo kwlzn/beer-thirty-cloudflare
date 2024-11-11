@@ -1,3 +1,7 @@
+//
+// A simplified replacement for the `soup` crate, to reduce transitive dependency size.
+//
+
 use regex::Regex;
 
 #[derive(Debug, Clone)]
