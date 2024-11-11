@@ -512,7 +512,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
     let router = Router::new();
     Ok(router
-        .get_async("/b30", |_req, ctx| async move {
+        .get_async("/", |_req, ctx| async move {
             let kv = ctx.kv("b30")?;
             let json_url = get_beerthirty_json().await;
             let df = b30_json_to_dataframe(&json_url, &kv).await;
