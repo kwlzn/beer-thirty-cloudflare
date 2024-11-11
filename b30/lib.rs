@@ -1,3 +1,5 @@
+mod scraper;
+
 use chrono::NaiveDateTime;
 use futures::stream::{self, StreamExt};
 use polars_core::prelude::*;
@@ -72,34 +74,23 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     
     let mut resp = Fetch::Request(req).send().await.map_err(|e| format!("Failed to get response text: {}", e))?;
     let html = resp.text().await?;
-    let soup = Soup::new(&html);
-    
-    let scripts = soup.tag("script").find_all();
-    // Regex to find the getJSON URL
     let re = Regex::new(r#"getJSON\(['"](./)?json/([^'"]+)['"]"#).map_err(|e| format!("Regex creation failed: {}", e))?;
     
-    // Look through each script tag for the getJSON pattern
-    for script in scripts {
-        let content = script.text();
-        if content.contains("getJSON") {
-            if let Some(captures) = re.captures(&content) {
-                // Get the relative path from the regex capture
-                let relative_path = captures
-                    .get(2)
-                    .ok_or("Failed to capture JSON path")?
-                    .as_str();
-                
-                // Construct the full URL
-                return Ok(format!(
-                    "{}/json/{}",
-                    BASE_TAPHUNTER_URL,
-                    relative_path
-                ));
-            }
-        }
+    // Parse the getJSON fetch via regex.
+    if let Some(captures) = re.captures(&html) {
+        let relative_path = captures
+            .get(2)
+            .ok_or("Failed to capture JSON path")?
+            .as_str();
+
+        return Ok(format!(
+            "{}/json/{}",
+            BASE_TAPHUNTER_URL,
+            relative_path
+        ));
     }
     
-    Err("Could not find getJSON URL in any script tag".into())
+    Err("Could not find getJSON URL".into())
 }
 
 pub async fn get_beer_rating(search_string: &str) -> String {
