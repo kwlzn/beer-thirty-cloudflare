@@ -2,19 +2,16 @@ use chrono::NaiveDateTime;
 use futures::stream::{self, StreamExt};
 use polars_core::prelude::*;
 use regex::Regex;
-use reqwest;
 use serde_json::Value;
 use soup::prelude::*;
 use std::error::Error;
-use worker::{event, Context, Env, Request, Response, Router};
+use worker::{event, console_log, Context, Env, Fetch, Headers, Method, Request, Response, Router};
 use url::Url;
-
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
 const CONCURRENT_REQUESTS: usize = 5;
 const BASE_TAPHUNTER_URL: &str = "http://www.taphunter.com/bigscreen";
 const BASE_UNTAPPD_URL: &str = "https://untappd.com";
-
 
 #[derive(Debug)]
 struct BeerEntry {
@@ -26,9 +23,7 @@ struct BeerEntry {
     origin: String,
     style: String,
     days_old: String,
-    // untappd_rating: String,
 }
-
 
 fn clean_text(text: &str) -> String {
     text.split_whitespace()
@@ -39,45 +34,49 @@ fn clean_text(text: &str) -> String {
         .to_string()
 }
 
+fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
+    let date = NaiveDateTime::parse_from_str(
+        &format!("{} 00:00:00", date_str),
+        "%m/%d/%Y %H:%M:%S"
+    )?;
+
+    let now = chrono::Local::now().naive_local();
+    let days_old = (now - date).num_days();
+
+    Ok(days_old)
+}
 
 pub async fn get_beerthirty_json() -> String {
     match get_beerthirty_json_internal().await {
         Ok(json_url) => json_url,
         Err(e) => {
-            eprintln!("Error fetching Beer30 JSON URL: {}", e);
+            console_log!("Error fetching Beer30 JSON URL: {}", e);
             "N/A".to_string()
         }
     }
 }
 
-
 async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
-    // Fetch the main page
-    let client = reqwest::Client::new();
-    let response = client
-        .get(format!("{}/5469327503392768", BASE_TAPHUNTER_URL))
-        .header("User-Agent", USER_AGENT)
-        .send()
-        .await
-        .map_err(|e| format!("HTTP request failed: {}", e))?;
+    // Fetch the main menu page.
+    let mut headers = Headers::new();
+    headers.set("User-Agent", USER_AGENT)?;
     
-    if !response.status().is_success() {
-        return Err(format!("HTTP request returned status: {}", response.status()).into());
-    }
+    let req = Request::new_with_init(
+        &format!("{}/5469327503392768", BASE_TAPHUNTER_URL),
+        &worker::RequestInit {
+            method: Method::Get,
+            headers,
+            ..Default::default()
+        },
+    )?;
     
-    let html = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to get response text: {}", e))?;
-    
+    let mut resp = Fetch::Request(req).send().await.map_err(|e| format!("Failed to get response text: {}", e))?;
+    let html = resp.text().await?;
     let soup = Soup::new(&html);
     
-    // Find all script tags
     let scripts = soup.tag("script").find_all();
-    
     // Regex to find the getJSON URL
-    let re = Regex::new(r#"getJSON\(['"](./)?json/([^'"]+)['"]"#)
-        .map_err(|e| format!("Regex creation failed: {}", e))?;
+    let re = Regex::new(r#"getJSON\(['"](./)?json/([^'"]+)['"]"#).map_err(|e| format!("Regex creation failed: {}", e))?;
     
     // Look through each script tag for the getJSON pattern
     for script in scripts {
@@ -103,68 +102,63 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
     Err("Could not find getJSON URL in any script tag".into())
 }
 
-
 pub async fn get_beer_rating(search_string: &str) -> String {
     match get_beer_rating_internal(search_string).await {
         Ok(rating_and_url) => rating_and_url,
         Err(e) => {
-            eprintln!("Error fetching beer rating for '{}': {}", search_string, e);
+            console_log!("Error fetching beer rating for '{}': {}", search_string, e);
             "N/A".to_string()
         }
     }
 }
-
 
 // TODO: Cache this with https://docs.rs/worker-kv/0.7.0/worker_kv/index.html with a 1 week TTL.
 async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn Error>> {
     let url = Url::parse_with_params(
         &format!("{}/search", BASE_UNTAPPD_URL),
         &[("q", search_string)]
-    ).map_err(|e| Box::new(e) as Box<dyn Error>);
+    )?;
 
-    let client = reqwest::Client::new();
-    let response = client
-        .get(url?.as_str())
-        .header("User-Agent", USER_AGENT)
-        .send()
-        .await
-        .map_err(|e| format!("HTTP request failed: {}", e))?;
+    let mut headers = Headers::new();
+    headers.set("User-Agent", USER_AGENT)?;
     
-    if !response.status().is_success() {
-        return Err(format!("HTTP request returned status: {}", response.status()).into());
-    }
-    
-    let html = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to get response text: {}", e))?;
-    
+    let req = Request::new_with_init(
+        url.as_str(),
+        &worker::RequestInit {
+            method: Method::Get,
+            headers,
+            ..Default::default()
+        },
+    )?;
+
+    let mut resp = Fetch::Request(req).send().await.map_err(|e| format!("Failed to get response text: {}", e))?;    
+    let html = resp.text().await?;
     let soup = Soup::new(&html);
     
-    // Find the first beer-item div
+    // Find the first beer-item div.
     let beer_item = soup
         .class("beer-item")
         .find()
         .ok_or("HTML parsing: Could not find beer-item div")?;
     
-    // Find the first anchor tag within beer-item
+    // Find the first anchor tag within beer-item.
     let anchor = beer_item
         .tag("a")
         .find()
         .ok_or("HTML parsing: Could not find anchor tag")?;
     
-    // Get the href attribute
+    // Get the href attribute.
     let relative_url = anchor
         .get("href")
         .ok_or("HTML parsing: Could not find href attribute")?;
     
-    // Find the caps div within the beer-item
+    // Find the caps div within the beer-item.
     let caps_div = beer_item
         .class("caps")
         .find()
         .ok_or("HTML parsing: Could not find caps div")?;
     
-    // Extract the data-rating attribute
+    // Extract the data-rating attribute.
     let rating = caps_div
         .get("data-rating")
         .ok_or("HTML parsing: Could not find data-rating attribute")?;
@@ -177,41 +171,23 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
     ))
 }
 
-
-fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
-    // Parse the date string into a NaiveDateTime
-    let date = NaiveDateTime::parse_from_str(
-        &format!("{} 00:00:00", date_str),
-        "%m/%d/%Y %H:%M:%S"
-    )?;
-    
-    // Get current time
-    let now = chrono::Local::now().naive_local();
-    
-    // Calculate the difference in days
-    let days_old = (now - date).num_days();
-    
-    Ok(days_old)
-}
-
-
 async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box<dyn Error>> {    
-    // Create owned search strings with their indices
+    // Create owned search strings with their indices.
     let search_strings: Vec<(usize, String)> = entries.iter()
         .enumerate()
         .map(|(idx, entry)| (idx, format!("{} {}", entry.brewery, entry.name)))
         .collect();
     
-    // Create a vector to store results with proper capacity
+    // Create a vector to store results with proper capacity.
     let mut ratings = vec!["".to_string(); entries.len()];
     
-    // Process requests while preserving order
+    // Process requests while preserving order.
     let results: Vec<(usize, String)> = stream::iter(search_strings)
         .map(|(idx, search_string)| async move {
             let rating = match get_beer_rating_internal(&search_string).await {
                 Ok(rating) => rating,
                 Err(e) => {
-                    eprintln!("Error fetching rating for '{}': {}", search_string, e);
+                    console_log!("Error fetching rating for '{}': {}", search_string, e);
                     "N/A".to_string()
                 }
             };
@@ -221,7 +197,7 @@ async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box
         .collect()
         .await;
     
-    // Place results in the correct positions
+    // Place results in the correct positions.
     for (idx, rating) in results {
         ratings[idx] = rating;
     }
@@ -229,13 +205,25 @@ async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box
     Ok(ratings)
 }
 
-
 pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error>> {
-    // Fetch JSON data
-    let response = reqwest::get(url).await?.text().await?;
-    let json: Vec<Value> = serde_json::from_str(&response)?;
+    // Fetch JSON data.
+    let mut headers = Headers::new();
+    headers.set("User-Agent", USER_AGENT)?;
 
-    // Process each entry
+    let req = Request::new_with_init(
+        url,
+        &worker::RequestInit {
+            method: Method::Get,
+            headers,
+            ..Default::default()
+        },
+    )?;
+
+    let mut resp = Fetch::Request(req).send().await.map_err(|e| format!("Failed to get response text: {}", e))?;
+    let text = resp.text().await?;
+    let json: Vec<Value> = serde_json::from_str(&text)?;
+
+    // Process each entry.
     let mut entries = Vec::new();
     for item in json {
         let date_str = item["date_added"].as_str().unwrap_or("").to_string();
@@ -245,33 +233,33 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
             tap_number: item["serving_info"]["tap_number"].as_i64().unwrap_or(0) as i32,
             brewery: clean_text(&item["brewery"]["common_name"].as_str().unwrap_or("")),
             name: clean_text(&item["beer"]["beer_name"].as_str().unwrap_or("")),
-            // Convert empty ABV to "0.0".
             abv: {
                 let abv = clean_text(&item["beer"]["abv"].as_str().unwrap_or(""));
-                if abv.is_empty() {
-                    "0.0".to_string()
-                } else {
-                    abv
-                }
+                // Convert empty ABV to "0.0".
+                if abv.is_empty() { "0.0".to_string() } else { abv }
             },
             category: clean_text(&item["beer"]["style_category"].as_str().unwrap_or("")),
             origin: clean_text(&item["brewery"]["origin"].as_str().unwrap_or("")),
             style: clean_text(&item["beer"]["style"].as_str().unwrap_or("")),
             days_old: days_old.to_string(),
-            // untappd_rating: String::new(), // Will be populated later
         };
 
-        // Remove "**Nitro**" from brewery and name
+        // Remove extraneous "**Nitro**" from brewery and name (used to indicate nitro taps).
         entry.brewery = entry.brewery.replace("**Nitro**", "").trim().to_string();
-        entry.name = entry.name.replace("**NITRO**", "").replace("Nitro", "").replace("**Nitro**", "").trim().to_string();
+        entry.name = entry.name
+            .replace("NITRO", "")
+            .replace("**NITRO**", "")
+            .replace("Nitro", "")
+            .replace("**Nitro**", "")
+            .trim()
+            .to_string();
 
         // Remove Brewery name from beer name (if duplicated).
         entry.name = entry.name.replace(&entry.brewery, "").trim().to_string();
-
         entries.push(entry);
     }
 
-    // Create vectors for each column
+    // Create vectors for each column.
     let tap_numbers: Vec<i32> = entries.iter().map(|e| e.tap_number).collect();
     let breweries: Vec<String> = entries.iter().map(|e| e.brewery.clone()).collect();
     let names: Vec<String> = entries.iter().map(|e| e.name.clone()).collect();
@@ -283,10 +271,10 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         .map(|e| e.days_old.parse::<i64>().unwrap_or(0))
         .collect();
 
-    // Fetch all Untappd ratings concurrently
+    // Fetch all Untappd ratings concurrently.
     let ratings = fetch_untappd_ratings(&entries).await?;
 
-    // Create DataFrame
+    // Create DataFrame.
     let mut df = DataFrame::new(vec![
         Series::new("category", categories),
         Series::new("tap", tap_numbers),
@@ -303,7 +291,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         ["category", "abv"],
         false,
         true
-    ).map_err(|e| Box::new(e) as Box<dyn Error>)?;
+    )?;
 
     Ok(df)
 }
@@ -523,7 +511,6 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, Box<dyn
         .run(req, env).await?
     )
 }
-
 
 #[cfg(test)]
 mod tests {
