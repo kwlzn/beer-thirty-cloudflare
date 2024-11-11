@@ -2,6 +2,7 @@ name = "b30-worker"
 main = "build/worker/shim.mjs"
 compatibility_date = "2024-11-10"
 workers_dev = false
+route = { pattern = "URL/*", zone_name = "URL" }
 kv_namespaces = [
   { binding = "b30", id = "adadc32345c843b4b760da73d6186f6a" }
 ]
