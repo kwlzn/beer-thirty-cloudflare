@@ -7,12 +7,14 @@ use regex::Regex;
 use serde_json::Value;
 use std::error::Error;
 use worker::{event, console_log, Context, Env, Fetch, Headers, Method, Request, Response, Router};
+use worker_kv::{KvStore};
 use url::Url;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
 const CONCURRENT_REQUESTS: usize = 5;
 const BASE_TAPHUNTER_URL: &str = "http://www.taphunter.com/bigscreen";
 const BASE_UNTAPPD_URL: &str = "https://untappd.com";
+const CACHE_TTL_SECONDS: u64 = 7 * 24 * 60 * 60;  // 1 week
 
 #[derive(Debug)]
 struct BeerEntry {
@@ -45,6 +47,10 @@ fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
     let days_old = (now - date).num_days();
 
     Ok(days_old)
+}
+
+fn generate_cache_key(brewery: &str, name: &str) -> String {
+    format!("rating:{}:{}", brewery.to_lowercase(), name.to_lowercase())
 }
 
 pub async fn get_beerthirty_json() -> String {
@@ -156,21 +162,34 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
     ))
 }
 
-async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box<dyn Error>> {    
-    // Create owned search strings with their indices.
-    let search_strings: Vec<(usize, String)> = entries.iter()
-        .enumerate()
-        .map(|(idx, entry)| (idx, format!("{} {}", entry.brewery, entry.name)))
-        .collect();
-    
-    // Create a vector to store results with proper capacity.
+async fn fetch_untappd_ratings(entries: &[BeerEntry], kv: &KvStore) -> Result<Vec<String>, Box<dyn Error>> {
     let mut ratings = vec!["".to_string(); entries.len()];
     
-    // Process requests while preserving order.
-    let results: Vec<(usize, String)> = stream::iter(search_strings)
-        .map(|(idx, search_string)| async move {
+    // Process entries concurrently while preserving order
+    let results: Vec<(usize, String)> = stream::iter(entries.iter().enumerate())
+        .map(|(idx, entry)| async move {
+            let cache_key = generate_cache_key(&entry.brewery, &entry.name);
+
+            // Try to get from cache first
+            if let Ok(Some(cached_rating)) = kv.get(&cache_key).text().await {
+                return (idx, cached_rating);
+            }
+
+            // If not in cache, fetch from Untappd
+            let search_string = format!("{} {}", entry.brewery, entry.name);
             let rating = match get_beer_rating_internal(&search_string).await {
-                Ok(rating) => rating,
+                Ok(rating) => {
+                    // Store in cache with TTL
+                    if let Err(e) = kv.put(&cache_key, rating.clone())
+                        .expect("Failed to create PUT object")
+                        .expiration_ttl(CACHE_TTL_SECONDS)
+                        .execute()
+                        .await
+                    {
+                        console_log!("Failed to cache rating for '{}': {}", search_string, e);
+                    }
+                    rating
+                },
                 Err(e) => {
                     console_log!("Error fetching rating for '{}': {}", search_string, e);
                     "N/A".to_string()
@@ -182,7 +201,7 @@ async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box
         .collect()
         .await;
     
-    // Place results in the correct positions.
+    // Place results in the correct positions
     for (idx, rating) in results {
         ratings[idx] = rating;
     }
@@ -190,7 +209,7 @@ async fn fetch_untappd_ratings(entries: &[BeerEntry]) -> Result<Vec<String>, Box
     Ok(ratings)
 }
 
-pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error>> {
+pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame, Box<dyn Error>> {
     // Fetch JSON data.
     let mut headers = Headers::new();
     headers.set("User-Agent", USER_AGENT)?;
@@ -257,7 +276,7 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         .collect();
 
     // Fetch all Untappd ratings concurrently.
-    let ratings = fetch_untappd_ratings(&entries).await?;
+    let ratings = fetch_untappd_ratings(&entries, kv).await?;
 
     // Create DataFrame.
     let mut df = DataFrame::new(vec![
@@ -474,24 +493,14 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 #[event(fetch)]
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
     let router = Router::new();
-    println!("Hello");
     Ok(
         router
-        .get_async("/b30", |_req, _ctx| async move {
+        .get_async("/b30", |_req, ctx| async move {
+            let kv = ctx.kv("b30")?;
             let json_url = get_beerthirty_json().await;
-            let df = b30_json_to_dataframe(&json_url).await;
+            let df = b30_json_to_dataframe(&json_url, &kv).await;
             let df_html = dataframe_to_html(&df.unwrap());
             Ok(Response::from_html(format!("{}", df_html.unwrap()))?)
-
-            // if let Some(id) = ctx.param("id") {
-            //     let accounts = ctx.kv("ACCOUNTS")?;
-            //     return match accounts.get(id).json::<Account>().await? {
-            //         Some(account) => Response::from_json(&account),
-            //         None => Response::error("Not found", 404),
-            //     };
-            // }
-
-            // Response::error("Bad Request", 400)
         })
         .run(req, env).await?
     )

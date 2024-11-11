@@ -25,4 +25,5 @@ polars-core = "0.34.2"
 serde_json = "1.0"
 tokio = { version = "1.41.1", default-features = false, features = ["macros", "rt"] }
 worker = "0.4.2"
+worker-kv = "0.7.0"
 url = "2.3"
