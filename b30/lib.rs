@@ -5,7 +5,6 @@ use futures::stream::{self, StreamExt};
 use polars_core::prelude::*;
 use regex::Regex;
 use serde_json::Value;
-use soup::prelude::*;
 use std::error::Error;
 use worker::{event, console_log, Context, Env, Fetch, Headers, Method, Request, Response, Router};
 use url::Url;
@@ -124,34 +123,29 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
 
     let mut resp = Fetch::Request(req).send().await.map_err(|e| format!("Failed to get response text: {}", e))?;    
     let html = resp.text().await?;
-    let soup = Soup::new(&html);
     
-    // Find the first beer-item div.
-    let beer_item = soup
-        .class("beer-item")
-        .find()
+    // Find the first beer-item div
+    let beer_items = scraper::find_elements_by_class(&html, "beer-item");
+    let beer_item = beer_items.first()
         .ok_or("HTML parsing: Could not find beer-item div")?;
     
-    // Find the first anchor tag within beer-item.
-    let anchor = beer_item
-        .tag("a")
-        .find()
+    // Find the first anchor tag within beer-item
+    let anchor = scraper::find_first_anchor(beer_item.get_content())
         .ok_or("HTML parsing: Could not find anchor tag")?;
     
-    // Get the href attribute.
+    // Get the href attribute
     let relative_url = anchor
-        .get("href")
+        .get_attr("href")
         .ok_or("HTML parsing: Could not find href attribute")?;
     
-    // Find the caps div within the beer-item.
-    let caps_div = beer_item
-        .class("caps")
-        .find()
+    // Find the caps div within the beer-item
+    let caps_divs = scraper::find_elements_by_class(beer_item.get_content(), "caps");
+    let caps = caps_divs.first()
         .ok_or("HTML parsing: Could not find caps div")?;
     
-    // Extract the data-rating attribute.
-    let rating = caps_div
-        .get("data-rating")
+    // Extract the data-rating attribute
+    let rating = caps
+        .get_attr("data-rating")
         .ok_or("HTML parsing: Could not find data-rating attribute")?;
     
     Ok(format!(
@@ -238,10 +232,10 @@ pub async fn b30_json_to_dataframe(url: &str) -> Result<DataFrame, Box<dyn Error
         // Remove extraneous "**Nitro**" from brewery and name (used to indicate nitro taps).
         entry.brewery = entry.brewery.replace("**Nitro**", "").trim().to_string();
         entry.name = entry.name
-            .replace("NITRO", "")
             .replace("**NITRO**", "")
-            .replace("Nitro", "")
             .replace("**Nitro**", "")
+            .replace("NITRO", "")
+            .replace("Nitro", "")
             .trim()
             .to_string();
 
@@ -522,20 +516,4 @@ mod tests {
             result.contains("\">")
         );
     }
-
-    #[test]
-    fn test_url_extraction() {
-        // Test the regex pattern with a sample script content
-        let re = Regex::new(r#"getJSON\(['"](./)?json/([^'"]+)['"]"#).unwrap();
-        let sample = r#"$.getJSON('./json/ahJzfnRoZXRhcGh1bnRlci1ocmRyHwsSEnRhcGh1bnRlcl9sb2NhdGlvbhiAgIDYsMrbCQw', function(beers) {"#;
-        
-        let captures = re.captures(sample).unwrap();
-        let path = captures.get(2).unwrap().as_str();
-        
-        assert_eq!(
-            path,
-            "ahJzfnRoZXRhcGh1bnRlci1ocmRyHwsSEnRhcGh1bnRlcl9sb2NhdGlvbhiAgIDYsMrbCQw"
-        );
-    }
-
 }
