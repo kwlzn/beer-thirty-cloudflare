@@ -82,7 +82,7 @@ pub fn find_elements_by_class(html: &str, class_name: &str) -> Vec<Element> {
                                     }
                                     pos += c + closing_tag.len();
                                 }
-                            },
+                            }
                             // Only found closing tag
                             (None, Some(c)) => {
                                 depth -= 1;
@@ -91,7 +91,7 @@ pub fn find_elements_by_class(html: &str, class_name: &str) -> Vec<Element> {
                                     break;
                                 }
                                 pos += c + closing_tag.len();
-                            },
+                            }
                             // No more tags found
                             _ => break,
                         }
@@ -102,10 +102,8 @@ pub fn find_elements_by_class(html: &str, class_name: &str) -> Vec<Element> {
                         let mut attributes = Vec::new();
                         for attr_cap in attr_re.captures_iter(attrs_str) {
                             if let (Some(key), Some(value)) = (attr_cap.get(1), attr_cap.get(2)) {
-                                attributes.push((
-                                    key.as_str().to_string(),
-                                    value.as_str().to_string(),
-                                ));
+                                attributes
+                                    .push((key.as_str().to_string(), value.as_str().to_string()));
                             }
                         }
 
@@ -150,10 +148,7 @@ pub fn find_first_anchor(html: &str) -> Option<Element> {
             let mut attributes = Vec::new();
             for attr_cap in attr_re.captures_iter(attrs_str) {
                 if let (Some(key), Some(value)) = (attr_cap.get(1), attr_cap.get(2)) {
-                    attributes.push((
-                        key.as_str().to_string(),
-                        value.as_str().to_string(),
-                    ));
+                    attributes.push((key.as_str().to_string(), value.as_str().to_string()));
                 }
             }
 
