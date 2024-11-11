@@ -17,17 +17,8 @@ strip = true
 codegen-units = 1
 opt-level = "z"
 
-[features]
-build-binary = ["clap"]
-
-[[bin]]
-name = "test-tool"
-path = "b30/tool.rs"
-required-features = ["build-binary"]
-
 [dependencies]
 chrono = "0.4.38"
-clap = { version = "4.0", features = ["derive"], optional = true }
 futures = "0.3"
 regex = { version = "1.11.1", default-features = false, features = ["std", "unicode-perl"] }
 polars-core = "0.34.2"

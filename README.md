@@ -12,31 +12,22 @@ In particular, this worker:
 
 # Dev Usage
 
-## Server
-
-### Run a local Cloudflare dev server
+## Run a Local Dev Server
 
 ```
 $ npx wrangler dev
 ```
 
-### Deploy to Cloudflare
+## Dry-run Deploy to Cloudflare
+
+This is useful for checking the final package size before deploying, which must be <1MB for free Cloudflare deployments.
+
+```
+$ npx wrangler deploy --dry-run
+```
+
+## Deploy to Cloudflare
 
 ```
 $ npx wrangler deploy
-```
-
-## CLI Tool (For Development Only)
-
-## HTML Writer
-
-```
-$ cargo run > test.html && open test.html
-```
-
-## Beer Rating/URL Fetch
-
-```
-$ cargo run "Pliny the Elder" 2>/dev/null
-Rating for 'Pliny the Elder': <a href="https://untappd.com/beer/4499">4.494</a>
 ```
