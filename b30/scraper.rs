@@ -38,9 +38,6 @@ pub fn find_elements_by_class(html: &str, class_name: &str) -> Vec<Element> {
 
     let mut search_pos = 0;
     while let Some(tag_match) = open_tag_re.find(&html[search_pos..]) {
-        // Get the absolute position in the original string
-        // let abs_pos = search_pos + tag_match.start();
-
         // Get captures from the current position
         if let Some(cap) = open_tag_re.captures(&html[search_pos..]) {
             let tag_name = cap.get(1).unwrap().as_str();
