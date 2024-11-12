@@ -185,43 +185,47 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
 async fn fetch_untappd_ratings(
     entries: &[BeerEntry],
     kv: &KvStore,
-) -> AppResult<Vec<String>> {
+) -> Result<Vec<String>, Box<dyn Error>> {
     let mut ratings = vec!["".to_string(); entries.len()];
 
+    // Process entries concurrently while preserving order
     let results: Vec<(usize, String)> = stream::iter(entries.iter().enumerate())
         .map(|(idx, entry)| async move {
             let cache_key = generate_cache_key(&entry.brewery, &entry.name);
 
-            match kv.get(&cache_key).text().await {
-                Ok(Some(cached_rating)) => (idx, cached_rating),
-                _ => {
-                    let search_string = format!("{} {}", entry.brewery, entry.name);
-                    let rating = match get_beer_rating_internal(&search_string).await {
-                        Ok(rating) => rating,
-                        Err(e) => {
-                            console_log!("Error fetching rating: {}", e);
-                            "N/A".to_string()
-                        }
-                    };
-
-                    if let Err(e) = kv
-                        .put(&cache_key, &rating)
-                        .map_err(|e| AppError::Database(e.to_string()))?
-                        .expiration_ttl(CACHE_TTL_SECONDS)
-                        .execute()
-                        .await
-                    {
-                        console_log!("Cache error: {}", e);
-                    }
-
-                    (idx, rating)
-                }
+            // Try to get from cache first
+            if let Ok(Some(cached_rating)) = kv.get(&cache_key).text().await {
+                return (idx, cached_rating);
             }
+
+            // If not in cache, fetch from Untappd
+            let search_string = format!("{} {}", entry.brewery, entry.name);
+            let rating = match get_beer_rating_internal(&search_string).await {
+                Ok(rating) => rating,
+                Err(e) => {
+                    console_log!("Error fetching rating for '{}': {}", search_string, e);
+                    "N/A".to_string()
+                }
+            };
+
+            // Store in cache with TTL - including non-existent results
+            if let Err(e) = kv
+                .put(&cache_key, rating.clone())
+                .expect("Failed to create PUT object")
+                .expiration_ttl(CACHE_TTL_SECONDS)
+                .execute()
+                .await
+            {
+                console_log!("Failed to cache rating for '{}': {}", search_string, e);
+            }
+
+            (idx, rating)
         })
-        .buffer_unordered(CONCURRENT_REQUESTS as usize)
+        .buffer_unordered(CONCURRENT_REQUESTS)
         .collect()
         .await;
 
+    // Place results in the correct positions
     for (idx, rating) in results {
         ratings[idx] = rating;
     }
