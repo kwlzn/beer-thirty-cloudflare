@@ -16,7 +16,7 @@ const BASE_TAPHUNTER_URL: &str = "http://www.taphunter.com/bigscreen";
 const BASE_UNTAPPD_URL: &str = "https://untappd.com";
 const CACHE_TTL_SECONDS: u64 = 7 * 24 * 60 * 60; // 1 week
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct BeerEntry {
     tap_number: i32,
     brewery: String,
@@ -25,7 +25,7 @@ struct BeerEntry {
     category: String,
     origin: String,
     style: String,
-    days_old: String,
+    days_old: i32,
 }
 
 fn clean_text(text: &str) -> String {
@@ -256,7 +256,7 @@ pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame,
             category: clean_text(&item["beer"]["style_category"].as_str().unwrap_or("")),
             origin: clean_text(&item["brewery"]["origin"].as_str().unwrap_or("")),
             style: clean_text(&item["beer"]["style"].as_str().unwrap_or("")),
-            days_old: days_old.to_string(),
+            days_old: days_old as i32,
         };
 
         // Remove extraneous "**Nitro**" from brewery and name (used to indicate nitro taps).
@@ -283,10 +283,7 @@ pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame,
     let categories: Vec<String> = entries.iter().map(|e| e.category.clone()).collect();
     let origins: Vec<String> = entries.iter().map(|e| e.origin.clone()).collect();
     let styles: Vec<String> = entries.iter().map(|e| e.style.clone()).collect();
-    let days_old: Vec<i64> = entries
-        .iter()
-        .map(|e| e.days_old.parse::<i64>().unwrap_or(0))
-        .collect();
+    let days_old: Vec<i32> = entries.iter().map(|e| e.days_old).collect();
 
     // Fetch all Untappd ratings concurrently.
     let ratings = fetch_untappd_ratings(&entries, kv).await?;
@@ -474,7 +471,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
                 }
 
                 let column_name = df.get_column_names()[col_idx];
-                let is_numeric = matches!(column_name, "tap" | "age" | "rating");
+                let is_numeric = matches!(column_name, "tap" | "age" | "days_old" | "rating");
 
                 if col_idx == abv_idx {
                     let abv_value = cleaned_value.replace('%', "").parse::<f64>().unwrap_or(0.0);
