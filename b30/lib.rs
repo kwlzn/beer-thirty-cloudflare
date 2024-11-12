@@ -16,6 +16,27 @@ const BASE_TAPHUNTER_URL: &str = "http://www.taphunter.com/bigscreen";
 const BASE_UNTAPPD_URL: &str = "https://untappd.com";
 const CACHE_TTL_SECONDS: u64 = 7 * 24 * 60 * 60; // 1 week
 
+#[derive(Debug)]
+pub enum AppError {
+    Network(String),
+    Parse(String),
+    Internal(String),
+}
+
+impl std::error::Error for AppError {}
+
+impl std::fmt::Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AppError::Network(msg) => write!(f, "Network error: {}", msg),
+            AppError::Parse(msg) => write!(f, "Parse error: {}", msg),
+            AppError::Internal(msg) => write!(f, "Internal error: {}", msg),
+        }
+    }
+}
+
+type AppResult<T> = Result<T, AppError>;
+
 #[derive(Debug, Clone)]
 struct BeerEntry {
     tap_number: i32,
@@ -37,14 +58,13 @@ fn clean_text(text: &str) -> String {
         .to_string()
 }
 
-fn calculate_days_old(date_str: &str) -> Result<i64, Box<dyn Error>> {
-    let date =
-        NaiveDateTime::parse_from_str(&format!("{} 00:00:00", date_str), "%m/%d/%Y %H:%M:%S")?;
-
-    let now = chrono::Local::now().naive_local();
-    let days_old = (now - date).num_days();
-
-    Ok(days_old)
+fn calculate_days_old(date_str: &str) -> AppResult<i64> {
+    NaiveDateTime::parse_from_str(&format!("{} 00:00:00", date_str), "%m/%d/%Y %H:%M:%S")
+        .map_err(|e| AppError::Parse(format!("Failed to parse date: {}", e)))
+        .map(|date| {
+            let now = chrono::Local::now().naive_local();
+            (now - date).num_days()
+        })
 }
 
 fn generate_cache_key(brewery: &str, name: &str) -> String {
