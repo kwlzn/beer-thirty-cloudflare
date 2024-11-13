@@ -5,7 +5,6 @@ use futures::stream::{self, StreamExt};
 use polars_core::prelude::*;
 use regex::Regex;
 use serde_json::Value;
-use std::error::Error;
 use url::Url;
 use worker::{console_log, event, Context, Env, Fetch, Headers, Method, Request, Response, Router};
 use worker_kv::KvStore;
@@ -18,6 +17,7 @@ const CACHE_TTL_SECONDS: u64 = 7 * 24 * 60 * 60; // 1 week
 
 #[derive(Debug)]
 pub enum AppError {
+    Client(String),
     Network(String),
     Parse(String),
     Internal(String),
@@ -28,10 +28,17 @@ impl std::error::Error for AppError {}
 impl std::fmt::Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AppError::Client(msg) => write!(f, "Client error: {}", msg),
             AppError::Network(msg) => write!(f, "Network error: {}", msg),
             AppError::Parse(msg) => write!(f, "Parse error: {}", msg),
             AppError::Internal(msg) => write!(f, "Internal error: {}", msg),
         }
+    }
+}
+
+impl From<AppError> for worker::Error {
+    fn from(error: AppError) -> Self {
+        worker::Error::from(error.to_string())
     }
 }
 
@@ -81,10 +88,11 @@ pub async fn get_beerthirty_json() -> String {
     }
 }
 
-async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
+async fn get_beerthirty_json_internal() -> AppResult<String> {
     // Fetch the main menu page.
     let mut headers = Headers::new();
-    headers.set("User-Agent", USER_AGENT)?;
+    headers.set("User-Agent", USER_AGENT)
+        .map_err(|e| AppError::Client(format!("Failed to set headers: {}", e)))?;
 
     let req = Request::new_with_init(
         &format!("{}/5469327503392768", BASE_TAPHUNTER_URL),
@@ -93,27 +101,30 @@ async fn get_beerthirty_json_internal() -> Result<String, Box<dyn Error>> {
             headers,
             ..Default::default()
         },
-    )?;
+    )
+    .map_err(|e| AppError::Client(format!("Failed to create request: {}", e)))?;
 
     let mut resp = Fetch::Request(req)
         .send()
         .await
-        .map_err(|e| format!("Failed to get response text: {}", e))?;
-    let html = resp.text().await?;
+        .map_err(|e| AppError::Network(format!("Failed to get response: {}", e)))?;
+    let html = resp.text().await
+        .map_err(|e| AppError::Network(format!("Failed to get response text: {}", e)))?;
+
     let re = Regex::new(r#"getJSON\(['"](./)?json/([^'"]+)['"]"#)
-        .map_err(|e| format!("Regex creation failed: {}", e))?;
+        .map_err(|e| AppError::Parse(format!("Regex creation failed: {}", e)))?;
 
     // Parse the getJSON fetch via regex.
     if let Some(captures) = re.captures(&html) {
         let relative_path = captures
             .get(2)
-            .ok_or("Failed to capture JSON path")?
+            .ok_or_else(|| AppError::Parse("Failed to capture JSON path".into()))?
             .as_str();
 
-        return Ok(format!("{}/json/{}", BASE_TAPHUNTER_URL, relative_path));
+        Ok(format!("{}/json/{}", BASE_TAPHUNTER_URL, relative_path))
+    } else {
+        Err(AppError::Parse("Could not find getJSON URL".into()))
     }
-
-    Err("Could not find getJSON URL".into())
 }
 
 pub async fn get_beer_rating(search_string: &str) -> String {
@@ -126,14 +137,16 @@ pub async fn get_beer_rating(search_string: &str) -> String {
     }
 }
 
-async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn Error>> {
+async fn get_beer_rating_internal(search_string: &str) -> AppResult<String> {
     let url = Url::parse_with_params(
         &format!("{}/search", BASE_UNTAPPD_URL),
         &[("q", search_string)],
-    )?;
+    )
+    .map_err(|e| AppError::Parse(format!("Failed to parse URL: {}", e)))?;
 
     let mut headers = Headers::new();
-    headers.set("User-Agent", USER_AGENT)?;
+    headers.set("User-Agent", USER_AGENT)
+        .map_err(|e| AppError::Client(format!("Failed to set headers: {}", e)))?;
 
     let req = Request::new_with_init(
         url.as_str(),
@@ -142,39 +155,41 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
             headers,
             ..Default::default()
         },
-    )?;
+    )
+    .map_err(|e| AppError::Client(format!("Failed to create request: {}", e)))?;
 
     let mut resp = Fetch::Request(req)
         .send()
         .await
-        .map_err(|e| format!("Failed to get response text: {}", e))?;
-    let html = resp.text().await?;
+        .map_err(|e| AppError::Network(format!("Failed to get response: {}", e)))?;
+    let html = resp.text().await
+        .map_err(|e| AppError::Network(format!("Failed to get response text: {}", e)))?;
 
     // Find the first beer-item div
     let beer_items = scraper::find_elements_by_class(&html, "beer-item");
     let beer_item = beer_items
         .first()
-        .ok_or("HTML parsing: Could not find beer-item div")?;
+        .ok_or_else(|| AppError::Parse("Could not find beer-item div".into()))?;
 
     // Find the first anchor tag within beer-item
     let anchor = scraper::find_first_anchor(beer_item.get_content())
-        .ok_or("HTML parsing: Could not find anchor tag")?;
+        .ok_or_else(|| AppError::Parse("Could not find anchor tag".into()))?;
 
     // Get the href attribute
     let relative_url = anchor
         .get_attr("href")
-        .ok_or("HTML parsing: Could not find href attribute")?;
+        .ok_or_else(|| AppError::Parse("Could not find href attribute".into()))?;
 
     // Find the caps div within the beer-item
     let caps_divs = scraper::find_elements_by_class(beer_item.get_content(), "caps");
     let caps = caps_divs
         .first()
-        .ok_or("HTML parsing: Could not find caps div")?;
+        .ok_or_else(|| AppError::Parse("Could not find caps div".into()))?;
 
     // Extract the data-rating attribute
     let rating = caps
         .get_attr("data-rating")
-        .ok_or("HTML parsing: Could not find data-rating attribute")?;
+        .ok_or_else(|| AppError::Parse("Could not find data-rating attribute".into()))?;
 
     Ok(format!(
         "<a href=\"{}{}\">{}</a>",
@@ -185,7 +200,7 @@ async fn get_beer_rating_internal(search_string: &str) -> Result<String, Box<dyn
 async fn fetch_untappd_ratings(
     entries: &[BeerEntry],
     kv: &KvStore,
-) -> Result<Vec<String>, Box<dyn Error>> {
+) -> AppResult<Vec<String>> {
     let mut ratings = vec!["".to_string(); entries.len()];
 
     // Process entries concurrently while preserving order
@@ -233,10 +248,11 @@ async fn fetch_untappd_ratings(
     Ok(ratings)
 }
 
-pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame, Box<dyn Error>> {
+pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> AppResult<DataFrame> {
     // Fetch JSON data.
     let mut headers = Headers::new();
-    headers.set("User-Agent", USER_AGENT)?;
+    headers.set("User-Agent", USER_AGENT)
+        .map_err(|e| AppError::Client(format!("Failed to set headers: {}", e)))?;
 
     let req = Request::new_with_init(
         url,
@@ -245,14 +261,17 @@ pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame,
             headers,
             ..Default::default()
         },
-    )?;
+    )
+    .map_err(|e| AppError::Client(format!("Failed to create request: {}", e)))?;
 
     let mut resp = Fetch::Request(req)
         .send()
         .await
-        .map_err(|e| format!("Failed to get response text: {}", e))?;
-    let text = resp.text().await?;
-    let json: Vec<Value> = serde_json::from_str(&text)?;
+        .map_err(|e| AppError::Network(format!("Failed to get response: {}", e)))?;
+    let text = resp.text().await
+        .map_err(|e| AppError::Network(format!("Failed to get response text: {}", e)))?;
+    let json: Vec<Value> = serde_json::from_str(&text)
+        .map_err(|e| AppError::Parse(format!("Failed to parse JSON: {}", e)))?;
 
     // Process each entry.
     let mut entries = Vec::new();
@@ -319,15 +338,17 @@ pub async fn b30_json_to_dataframe(url: &str, kv: &KvStore) -> Result<DataFrame,
         Series::new("style", styles),
         Series::new("age", days_old),
         Series::new("rating", ratings),
-    ])?;
+    ])
+    .map_err(|e| AppError::Internal(format!("Failed to create DataFrame: {}", e)))?;
 
-    df.sort_in_place(["category", "abv"], false, true)?;
+    df.sort_in_place(["category", "abv"], false, true)
+        .map_err(|e| AppError::Internal(format!("Failed to sort DataFrame: {}", e)))?;
 
     Ok(df)
 }
 
 // Converts a Dataframe into an HTML string for output.
-pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
+pub fn dataframe_to_html(df: &DataFrame) -> AppResult<String> {
     let mut html = String::from(
         r#"
 <head>
@@ -395,7 +416,7 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
 
     html.push_str("<table>\n<thead>\n<tr>");
 
-    // Add headers - no longer need class for alignment since all headers are centered via CSS
+    // Add headers
     for name in df.get_column_names() {
         html.push_str(&format!("<th>{}</th>", name));
     }
@@ -405,12 +426,12 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
         .get_column_names()
         .iter()
         .position(|&name| name == "abv")
-        .ok_or("ABV column not found")?;
+        .ok_or_else(|| AppError::Internal("ABV column not found".into()))?;
     let category_idx = df
         .get_column_names()
         .iter()
         .position(|&name| name == "category")
-        .ok_or("Category column not found")?;
+        .ok_or_else(|| AppError::Internal("Category column not found".into()))?;
 
     let height = df.height();
     let mut current_category = String::new();
@@ -524,17 +545,24 @@ pub fn dataframe_to_html(df: &DataFrame) -> Result<String, Box<dyn Error>> {
     Ok(html)
 }
 
-// Cloudflare worker main fetch entrypoint.
 #[event(fetch)]
-async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, Box<dyn Error>> {
+async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response, worker::Error> {
     let router = Router::new();
     Ok(router
         .get_async("/", |_req, ctx| async move {
-            let kv = ctx.kv("b30")?;
-            let json_url = get_beerthirty_json().await;
-            let df = b30_json_to_dataframe(&json_url, &kv).await;
-            let df_html = dataframe_to_html(&df.unwrap());
-            Ok(Response::from_html(format!("{}", df_html.unwrap()))?)
+            let result: Result<Response, worker::Error> = (|| async {
+                let kv = ctx.kv("b30")
+                    .map_err(|e| AppError::Client(format!("Failed to get KV store: {}", e)))?;
+                let json_url = get_beerthirty_json().await;
+                let df = b30_json_to_dataframe(&json_url, &kv).await?;
+                let df_html = dataframe_to_html(&df)?;
+                Response::from_html(format!("{}", df_html))
+                    .map_err(|e| AppError::Internal(format!("Failed to create response: {}", e)))
+            })()
+            .await
+            .map_err(worker::Error::from);
+
+            result
         })
         .run(req, env)
         .await?)
