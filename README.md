@@ -1,6 +1,6 @@
 # Beer Thirty Tap Menu
 
-This is a rust-based Cloudflare worker for reconstituting the tap menu at [Beer Thirty](https://www.beerthirtysantacruz.com/) (a popular tap room in Santa Cruz, CA).
+This is a [rust-based Cloudflare worker](https://developers.cloudflare.com/workers/languages/rust/) for reconstituting the tap menu at [Beer Thirty](https://www.beerthirtysantacruz.com/) (a popular tap room in Santa Cruz, CA).
 
 In particular, this worker:
 
