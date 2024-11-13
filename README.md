@@ -1,6 +1,6 @@
 # Beer Thirty Tap Menu
 
-This is a [rust-based Cloudflare worker](https://developers.cloudflare.com/workers/languages/rust/) for reconstituting the tap menu at [Beer Thirty](https://www.beerthirtysantacruz.com/) (a popular tap room in Santa Cruz, CA).
+This is a [rust-based Cloudflare worker](https://developers.cloudflare.com/workers/languages/rust/) for enriching and reconstituting the tap menu at [Beer Thirty](https://www.beerthirtysantacruz.com/) (a popular tap room in Santa Cruz, CA).
 
 In particular, this worker:
 
@@ -10,7 +10,7 @@ In particular, this worker:
 4. Sorts within the group by ABV and heatmaps the ABV column.
 5. Renders this in a table for easy tap selection.
 
-This worker is compiled to a wasm binary, which is then composed with some shims by the `worker-build` binary to produce an E2E working rust Cloudflare worker.
+This code is compiled to a wasm binary, which is then composed with some shims by the `worker-build` binary to produce an E2E working rust Cloudflare worker.
 
 # Development
 
