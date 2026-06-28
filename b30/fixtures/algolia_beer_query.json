@@ -1,0 +1,232 @@
+{
+ "hits": [
+  {
+   "bid": 6284,
+   "beer_abv": 5.6,
+   "beer_ibu": 38,
+   "beer_name": "Pale Ale",
+   "beer_index": "sierra nevada brewing co. pale ale",
+   "brewery_label": "https://assets.untappd.com/site/brewery_logos/brewery-1142_ddcfe.jpeg",
+   "brewery_name": "Sierra Nevada Brewing Co.",
+   "brewery_id": 1142,
+   "type_name": "Pale Ale - American",
+   "type_id": 99,
+   "parent_style_id": 53,
+   "parent_style_is_beer": 1,
+   "thc_mg": null,
+   "cbd_mg": null,
+   "homebrew": 0,
+   "in_production": 1,
+   "popularity": 1298840,
+   "beer_slug": "sierra-nevada-brewing-co-pale-ale",
+   "alias_alt": [
+    "original 1980 pale ale"
+   ],
+   "spelling_alt": [],
+   "brewery_alias": [
+    "siera nevada"
+   ],
+   "beer_label": "https://assets.untappd.com/site/beer_logos/beer-6284_5418f_sm.jpeg",
+   "beer_label_hd": "https://assets.untappd.com/site/beer_logos_hd/beer-6284_5418f_hd.jpeg",
+   "beer_index_short": "sierranevadabrewingco.paleale",
+   "beer_name_sort": "Pale Ale",
+   "brewery_name_sort": "Sierra Nevada Brewing Co.",
+   "rating_score": 3.62,
+   "rating_count": 548317,
+   "brewery_beer_name": "Sierra Nevada Brewing Co. Pale Ale",
+   "_geoloc": {
+    "lat": 39.7242,
+    "lng": -121.815
+   },
+   "has_community_award": false,
+   "index_date": "2026-06-27T14:08:01.886Z",
+   "synced_from": "next",
+   "objectID": "6284",
+   "_highlightResult": {
+    "beer_name": {
+     "value": "<em>Pale</em> <em>Ale</em>",
+     "matchLevel": "partial",
+     "fullyHighlighted": true,
+     "matchedWords": [
+      "pale",
+      "ale"
+     ]
+    },
+    "beer_index": {
+     "value": "<em>sierra</em> <em>nevada</em> brewing co. <em>pale</em> <em>ale</em>",
+     "matchLevel": "full",
+     "fullyHighlighted": false,
+     "matchedWords": [
+      "sierra",
+      "nevada",
+      "pale",
+      "ale"
+     ]
+    },
+    "alias_alt": [
+     {
+      "value": "original 1980 <em>pale</em> <em>ale</em>",
+      "matchLevel": "partial",
+      "fullyHighlighted": false,
+      "matchedWords": [
+       "pale",
+       "ale"
+      ]
+     }
+    ],
+    "brewery_alias": [
+     {
+      "value": "siera <em>nevada</em>",
+      "matchLevel": "partial",
+      "fullyHighlighted": false,
+      "matchedWords": [
+       "nevada"
+      ]
+     }
+    ],
+    "brewery_beer_name": {
+     "value": "<em>Sierra</em> <em>Nevada</em> Brewing Co. <em>Pale</em> <em>Ale</em>",
+     "matchLevel": "full",
+     "fullyHighlighted": false,
+     "matchedWords": [
+      "sierra",
+      "nevada",
+      "pale",
+      "ale"
+     ]
+    }
+   }
+  },
+  {
+   "bid": 472872,
+   "beer_abv": 5,
+   "beer_ibu": 36,
+   "beer_name": "Draught-Style Pale Ale",
+   "beer_index": "sierra nevada brewing co. draught-style pale ale",
+   "brewery_label": "https://assets.untappd.com/site/brewery_logos/brewery-1142_ddcfe.jpeg",
+   "brewery_name": "Sierra Nevada Brewing Co.",
+   "brewery_id": 1142,
+   "type_name": "Pale Ale - American",
+   "type_id": 99,
+   "parent_style_id": 53,
+   "parent_style_is_beer": 1,
+   "thc_mg": null,
+   "cbd_mg": null,
+   "homebrew": 0,
+   "in_production": 1,
+   "popularity": 15943,
+   "beer_slug": "sierra-nevada-brewing-co-draught-style-pale-ale",
+   "alias_alt": [
+    "draft style pale ale",
+    "drought style ale"
+   ],
+   "spelling_alt": [],
+   "brewery_alias": [
+    "siera nevada"
+   ],
+   "beer_label": "https://assets.untappd.com/site/beer_logos/beer-472872_8eae5_sm.jpeg",
+   "beer_label_hd": "https://assets.untappd.com/site/beer_logos_hd/beer-472872_e442e_hd.jpeg",
+   "beer_index_short": "sierranevadabrewingco.draught-stylepaleale",
+   "beer_name_sort": "Draught-Style Pale Ale",
+   "brewery_name_sort": "Sierra Nevada Brewing Co.",
+   "rating_score": 3.6,
+   "rating_count": 12556,
+   "brewery_beer_name": "Sierra Nevada Brewing Co. Draught-Style Pale Ale",
+   "_geoloc": {
+    "lat": 39.7242,
+    "lng": -121.815
+   },
+   "has_community_award": false,
+   "index_date": "2026-06-27T14:10:03.309Z",
+   "synced_from": "next",
+   "objectID": "472872",
+   "_highlightResult": {
+    "beer_name": {
+     "value": "Draught-Style <em>Pale</em> <em>Ale</em>",
+     "matchLevel": "partial",
+     "fullyHighlighted": false,
+     "matchedWords": [
+      "pale",
+      "ale"
+     ]
+    },
+    "beer_index": {
+     "value": "<em>sierra</em> <em>nevada</em> brewing co. draught-style <em>pale</em> <em>ale</em>",
+     "matchLevel": "full",
+     "fullyHighlighted": false,
+     "matchedWords": [
+      "sierra",
+      "nevada",
+      "pale",
+      "ale"
+     ]
+    },
+    "alias_alt": [
+     {
+      "value": "draft style <em>pale</em> <em>ale</em>",
+      "matchLevel": "partial",
+      "fullyHighlighted": false,
+      "matchedWords": [
+       "pale",
+       "ale"
+      ]
+     },
+     {
+      "value": "drought style <em>ale</em>",
+      "matchLevel": "partial",
+      "fullyHighlighted": false,
+      "matchedWords": [
+       "ale"
+      ]
+     }
+    ],
+    "brewery_alias": [
+     {
+      "value": "siera <em>nevada</em>",
+      "matchLevel": "partial",
+      "fullyHighlighted": false,
+      "matchedWords": [
+       "nevada"
+      ]
+     }
+    ],
+    "brewery_beer_name": {
+     "value": "<em>Sierra</em> <em>Nevada</em> Brewing Co. Draught-Style <em>Pale</em> <em>Ale</em>",
+     "matchLevel": "full",
+     "fullyHighlighted": false,
+     "matchedWords": [
+      "sierra",
+      "nevada",
+      "pale",
+      "ale"
+     ]
+    }
+   }
+  }
+ ],
+ "nbHits": 70,
+ "page": 0,
+ "nbPages": 35,
+ "hitsPerPage": 2,
+ "exhaustiveNbHits": false,
+ "exhaustiveTypo": false,
+ "exhaustive": {
+  "nbHits": false,
+  "typo": false
+ },
+ "query": "sierra nevada pale ale",
+ "params": "query=sierra+nevada+pale+ale&hitsPerPage=2",
+ "processingTimeMS": 32,
+ "processingTimingsMS": {
+  "_request": {
+   "roundTrip": 86
+  },
+  "fetch": {
+   "query": 23,
+   "scanning": 8,
+   "total": 32
+  },
+  "total": 32
+ },
+ "serverTimeMS": 33
+}

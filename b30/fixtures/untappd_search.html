@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+			<title>Untappd Search | Untappd</title>
+		
+	<meta property="og:site_name" content="Untappd" />
+
+	<!-- meta block -->
+			<meta name="description" content="Looking for something on Untappd? Search to find any beer, brewery or venue on Untappd." />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+	<meta name="referrer" content="origin-when-crossorigin">
+	<meta name="author" content="The Untappd Team" />
+	<meta name="Copyright" content="Copyright Untappd 2026. All Rights Reserved." />
+	<meta name="DC.title" content="Untappd" />
+			<meta name="DC.subject" content="Looking for something on Untappd? Search to find any beer, brewery or venue on Untappd." />
+			<meta name="DC.creator" content="The Untappd Team" />
+
+	<meta name="google-site-verification" content="EnR7QavTgiLCzZCCOv_OARCHsHhFwkwnJdG0Sti9Amg" />
+	<meta name="bitly-verification" content="b3080898518a"/>
+
+	<!-- favicon -->
+	<link rel="apple-touch-icon" sizes="144x144" href="https://untappd.com/assets/apple-touch-icon.png">
+	<link rel="icon" type="image/png" href="https://untappd.com/assets/favicon-32x32-v2.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="https://untappd.com/assets/favicon-16x16-v2.png" sizes="16x16">
+	<link rel="manifest" href="https://untappd.com/assets/manifest.json">
+	<link rel="mask-icon" href="https://untappd.com/assets/safari-pinned-tab.svg" color="#5bbad5">
+
+	<link rel="stylesheet"
+    	href="https://untappd.com/assets/css/tailwind.css?v=2.8.39">
+	</link>
+
+	<link id="canonical" rel="canonical" href="https://untappd.com/search">		<link rel="stylesheet" href="https://untappd.com/assets/css/master.min.css?v=4.5.43" />
+		<link rel="stylesheet" href="https://untappd.com/assets/v3/css/style.css?v=4.5.43" />
+		<link rel="stylesheet" href="https://untappd.com/assets/design-system/css/styles.css?v=4.5.43" />
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
+			<script src="https://untappd.com/assets/v3/js/common/min/site_common_min.js?v=2.8.39"></script>
+				<link rel="stylesheet" href="https://untappd.com/assets/css/facybox.min.css?v=4.5.43" />
+			
+		<link rel="stylesheet" href="https://untappd.com/assets/css/jquery.notifyBar.min.css?v=4.5.43" />
+		<link rel="stylesheet" href="https://untappd.com/assets/css/tipsy.min.css?v=4.5.43" type="text/css" media="screen" title="no title" charset="utf-8">
+		
+		<script type="text/javascript" language="Javascript">
+			$(document).ready(function(){
+				$(".tip").tipsy({fade: true});
+				$('.badge_hint').tipsy({gravity: 's', fade: true});
+				$('.disabled').tipsy({gravity: 'n', fade: true});
+
+				refreshTime(".timezoner", "D MMM YY", true);
+
+				$(".tab").click(function(){
+					$(".tab-area li").removeClass('active');
+					$(this).parent().addClass('active');
+					$(".list").hide();
+					$($(this).attr("href")).show();
+					return false;
+				});
+			});
+
+			</script>
+			<!-- For IE -->
+	<script type="text/javascript" language="Javascript">
+	onChangeInterval = "";
+	if(!(window.console && console.log)) {
+	  console = {
+	    log: function(){},
+	    debug: function(){},
+	    info: function(){},
+	    warn: function(){},
+	    error: function(){}
+	  };
+	}
+	</script>
+	
+	<!-- algoliasearch -->
+	<script type="text/javascript" src="https://untappd.com/assets/libs/js/algoliasearch.min.js?v2.8.39"></script>
+	<script type="text/javascript" src="https://untappd.com/assets/libs/js/autocomplete.min.js?v2.8.39"></script>
+	<script type="text/javascript" src="https://untappd.com/assets/libs/js/lodash.min.js?v2.8.39"></script>
+	<script type="text/javascript" src="https://untappd.com/assets/js/global/autosearch_tracking.min.js?v2.8.39"></script>
+
+	<script>
+        !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e.aa=e.aa||function(){(e.aa.queue=e.aa.queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],i.async=1,i.src="https://cdn.jsdelivr.net/npm/search-insights@0.0.14",c.parentNode.insertBefore(i,c)}(window,document,"script",0,"aa");
+
+        // Initialize library
+        aa('init', {
+        applicationID: '9WBO4RQ3HO',
+        apiKey: '1d347324d67ec472bb7132c66aead485',
+        })
+    </script>
+
+
+			<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-N4DVXTR');</script>
+		<!-- End Google Tag Manager -->
+	
+	<script src="https://untappd.com/assets/v3/js/venue-impression-tracker.js"></script>
+
+	<script type="text/javascript">
+		var clevertap = {event:[], profile:[], account:[], onUserLogin:[], region: 'us1', notifications:[], privacy:[]};
+        clevertap.account.push({"id": "865-K5R-W96Z"});
+        clevertap.privacy.push({optOut: false}); //set the flag to true, if the user of the device opts out of sharing their data
+        clevertap.privacy.push({useIP: true}); //set the flag to true, if the user agrees to share their IP data
+        (function () {
+                var wzrk = document.createElement('script');
+                wzrk.type = 'text/javascript';
+                wzrk.async = true;
+                wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(wzrk, s);
+        })();
+	</script>
+
+    
+<!-- Freestar Ads -->
+<!-- Below is a recommended list of pre-connections, which allow the network to establish each connection quicker, speeding up response times and improving ad performance. -->
+<link rel="preconnect" href="https://a.pub.network/" crossorigin />
+<link rel="preconnect" href="https://b.pub.network/" crossorigin />
+<link rel="preconnect" href="https://c.pub.network/" crossorigin />
+<link rel="preconnect" href="https://d.pub.network/" crossorigin />
+<link rel="preconnect" href="https://c.amazon-adsystem.com" crossorigin />
+<link rel="preconnect" href="https://s.amazon-adsystem.com" crossorigin />
+<link rel="preconnect" href="https://btloader.com/" crossorigin />
+<link rel="preconnect" href="https://api.btloader.com/" crossorigin />
+<link rel="preconnect" href="https://cdn.confiant-integrations.net" crossorigin />
+<!-- Below is a link to a CSS file that accounts for Cumulative Layout Shift, a new Core Web Vitals subset that Google uses to help rank your site in search -->
+<!-- The file is intended to eliminate the layout shifts that are seen when ads load into the page. If you don't want to use this, simply remove this file -->
+<!-- To find out more about CLS, visit https://web.dev/vitals/ -->
+<link rel="stylesheet" href="https://a.pub.network/untappd-com/cls.css">
+<script data-cfasync="false" type="text/javascript">
+    var isLoggedIn = false;
+    console.log("freestar_init", `isLoggedIn: ${isLoggedIn}`);
+
+    var env = 'PROD';
+
+    var freestar = freestar || {};
+    freestar.queue = freestar.queue || [];
+    freestar.queue.push(function () {
+        if (env !== 'PROD') {   
+            googletag.pubads().set('page_url', 'https://untappd.com/'); // Makes ads fill in non-prod environments
+        }
+    });
+    freestar.config = freestar.config || {};
+    if (isLoggedIn) {
+        // https://freestarhelp.zendesk.com/hc/en-us/articles/34516941197460-Disabling-Products
+        freestar.config.disabledProducts = {
+            stickyFooter: true,
+            video: true,
+            stickyRail: true,
+            pushdown: true,
+            dynamicAds: true,
+            sideWall: true,
+            pageGrabber: true,
+            googleInterstitial: true,
+            videoAdhesion: true,
+            iai: true,
+        };  
+    }
+    freestar.config.enabled_slots = [];
+    freestar.initCallback = function () { (freestar.config.enabled_slots.length === 0) ? freestar.initCallbackCalled = false : freestar.newAdSlots(freestar.config.enabled_slots) };
+</script>
+
+<!-- Ad-blocking revenue recovery tool provided by Tyler (https://nextglass.slack.com/archives/C049TLGTPRR/p1770762270660589) -->
+<script data-cfasync="false" type="text/javascript">
+    (()=>{var h=(o,t,i)=>new Promise((e,n)=>{var s=u=>{try{l(i.next(u))}catch(v){n(v)}},d=u=>{try{l(i.throw(u))}catch(v){n(v)}},l=u=>u.done?e(u.value):Promise.resolve(u.value).then(s,d);l((i=i.apply(o,t)).next())});var D,kt=new Uint8Array(16);function G(){if(!D&&(D=typeof crypto!="undefined"&&crypto.getRandomValues&&crypto.getRandomValues.bind(crypto),!D))throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");return D(kt)}var c=[];for(let o=0;o<256;++o)c.push((o+256).toString(16).slice(1));function st(o,t=0){return c[o[t+0]]+c[o[t+1]]+c[o[t+2]]+c[o[t+3]]+"-"+c[o[t+4]]+c[o[t+5]]+"-"+c[o[t+6]]+c[o[t+7]]+"-"+c[o[t+8]]+c[o[t+9]]+"-"+c[o[t+10]]+c[o[t+11]]+c[o[t+12]]+c[o[t+13]]+c[o[t+14]]+c[o[t+15]]}var Et=typeof crypto!="undefined"&&crypto.randomUUID&&crypto.randomUUID.bind(crypto),W={randomUUID:Et};function Tt(o,t,i){if(W.randomUUID&&!t&&!o)return W.randomUUID();o=o||{};let e=o.random||(o.rng||G)();if(e[6]=e[6]&15|64,e[8]=e[8]&63|128,t){i=i||0;for(let n=0;n<16;++n)t[i+n]=e[n];return t}return st(e)}var B=Tt;typeof document!="undefined"&&(A=document.createElement("style"),A.setAttribute("type","text/css"),A.appendChild(document.createTextNode('div._1bm7ugs{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:999999}div._1bm7ugs *{box-sizing:border-box}div._1bm7ugs div.ittm5a{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;justify-content:flex-start;min-height:25vh;width:50%;background-color:#fff;border:none;border-radius:1em;box-shadow:0 0 10px rgba(0,0,0,0.3);text-align:center;font-size:13px;font-family:Arial,Helvetica,sans-serif;font-weight:bold;line-height:2;color:#000000}div._1bm7ugs div.ittm5a *:before,div._1bm7ugs div.ittm5a *:after{content:"";display:none}@media screen and (max-width:479px){div._1bm7ugs div.ittm5a{font-size:13px;width:90%}}@media screen and (min-width:480px){div._1bm7ugs div.ittm5a{font-size:14px;width:80%}}@media screen and (min-width:608px){div._1bm7ugs div.ittm5a{font-size:14px;width:70%}}@media screen and (min-width:960px){div._1bm7ugs div.ittm5a{font-size:16px;width:70%}}@media screen and (min-width:1200px){div._1bm7ugs div.ittm5a{font-size:16px;width:840px}}div._1bm7ugs div.ittm5a div._1wmm6xd{width:100%;background-color:transparent;border:0;color:inherit;display:block;font-size:1em;font-family:inherit;letter-spacing:normal;margin:0;opacity:1;outline:none;padding:1em 2em;position:static;text-align:center}div._1bm7ugs div.ittm5a div._1wmm6xd img{display:inline;margin:0 0 16px 0;padding:0;max-width:240px;max-height:60px}div._1bm7ugs div.ittm5a div._1wmm6xd h2{display:block;line-height:1.3;padding:0;font-family:inherit;font-weight:normal;font-style:normal;text-decoration:initial;text-align:center;font-size:1.75em;margin:0;color:inherit}div._1bm7ugs div.ittm5a div._1wmm6xd h2:not(img+*){margin-top:30px}div._1bm7ugs div.ittm5a div._1wmm6xd span._10cqbyd{position:absolute;top:0;right:15px;font-size:2em;font-weight:normal;cursor:pointer;color:inherit}div._1bm7ugs div.ittm5a div._1wmm6xd span._10cqbyd:hover{filter:brightness(115%)}div._1bm7ugs div.ittm5a section{width:100%;margin:0;padding:1em 2em;text-align:center;font-family:inherit;color:inherit;background:transparent}div._1bm7ugs div.ittm5a section p{display:block;margin:0 0 1em 0;line-height:1.5;text-align:center;font-size:1em;font-family:inherit;color:inherit;overflow-wrap:break-word;font-weight:normal;font-style:normal;text-decoration:initial}div._1bm7ugs div.ittm5a section p:last-of-type{margin:0 0 1.5em 0}div._1bm7ugs div.ittm5a section.zgt4cb{display:block}div._1bm7ugs div.ittm5a section.zgt4cb._15yer7c{display:none}div._1bm7ugs div.ittm5a section.zgt4cb a.mhlzqc._1emtbbe{color:var(--_1emtbbe)}div._1bm7ugs div.ittm5a section.zgt4cb a.mhlzqc.g0b7gl{text-decoration:var(--g0b7gl)}div._1bm7ugs div.ittm5a section.zgt4cb a.mhlzqc._1h4vo4h:visited{color:var(--_1h4vo4h)}div._1bm7ugs div.ittm5a section.zgt4cb div.axqbiy{display:block;margin:0.75em;padding:0}div._1bm7ugs div.ittm5a section.zgt4cb div.axqbiy p._10lak7c{max-width:80%;margin:0 auto;padding:0;font-size:0.85em;color:inherit;font-style:normal;font-weight:normal;cursor:pointer}div._1bm7ugs div.ittm5a section.g3f52f{display:block}div._1bm7ugs div.ittm5a section.g3f52f._15yer7c{display:none}div._1bm7ugs div.ittm5a section.g3f52f h4._1e70kqd{color:inherit;text-align:initial;font-weight:normal;font-family:inherit;font-size:1.125em;margin:0 0 0.5em 0.5em}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss{display:flex;margin:1.5em 0}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss ul._19i18vc{max-height:300px;flex:2;list-style:none;overflow-y:auto;margin:0 1em 0 0;padding-inline-start:0}@media screen and (min-width:608px){div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss ul._19i18vc{flex:1;margin:0 2em 0 0}}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss ul._19i18vc li{padding:0.75em;cursor:pointer;background:rgba(0,0,0,0.05);font-weight:bold}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss ul._19i18vc li:hover{background:rgba(0,0,0,0.075)}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss ul._19i18vc li._1lowx25{color:var(--_1lsu7q);background:var(--vot3fy)}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss div._1kebabo{max-height:300px;overflow-y:auto;flex:3;display:flex;flex-direction:column;justify-content:space-between;text-align:initial}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss div._1kebabo ol._130j852{display:none;list-style-type:decimal;text-align:initial;padding:0;margin:0 2em;font-weight:normal}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss div._1kebabo ol._130j852._1lowx25{display:block}div._1bm7ugs div.ittm5a section.g3f52f div.i5jiss div._1kebabo p{margin:1em 0 0;text-align:inherit;font-style:italic}div._1bm7ugs div.ittm5a section.g3f52f button.hrbmcw{font-size:1em;text-transform:initial}div._1bm7ugs div.ittm5a button._10jcka8{width:auto;height:auto;max-width:90%;cursor:pointer;display:inline-block;letter-spacing:normal;margin:0.75em;opacity:1;outline:none;overflow-wrap:break-word;font-family:inherit;font-weight:normal;font-style:normal;text-decoration:initial;text-transform:uppercase;text-align:center;color:#FFFFFF;font-size:1.15em;padding:0.75em 2em;padding-inline:2em;padding-block:0.75em;line-height:normal;background:#40C28A;border:none;border-radius:0.25em;box-shadow:none}div._1bm7ugs div.ittm5a button._10jcka8:hover{filter:brightness(115%);box-shadow:none}div._1bm7ugs div.ittm5a a._1ahf6lp{height:50px;width:50px;position:absolute;bottom:5px;right:5px}div._1bm7ugs div.ittm5a a._1ahf6lp img{position:initial;height:100%;width:100%;filter:drop-shadow(1px 1px 1px var(--_1n05zg8))}')),document.head.appendChild(A));var A;var at="aHR0cHM6Ly9hLnB1Yi5uZXR3b3JrL2NvcmUvcHJlYmlkLXVuaXZlcnNhbC1jcmVhdGl2ZS5qcw==",rt="aHR0cHM6Ly93d3cuZ29vZ2xldGFnc2VydmljZXMuY29tL3RhZy9qcy9ncHQuanM=",dt="aHR0cHM6Ly9hLnB1Yi5uZXR3b3JrL2NvcmUvaW1ncy8xLnBuZw==",lt="ZGF0YS1mcmVlc3Rhci1hZA==",ct="c2l0ZS1jb25maWcuY29t";var mt="aHR0cHM6Ly9mcmVlc3Rhci5jb20vYWQtcHJvZHVjdHMvZGVza3RvcC1tb2JpbGUvZnJlZXN0YXItcmVjb3ZlcmVk",ut=["Y29uZmlnLmNvbmZpZy1mYWN0b3J5LmNvbQ==","Y29uZmlnLmNvbnRlbnQtc2V0dGluZ3MuY29t","Y29uZmlnLnNpdGUtY29uZmlnLmNvbQ==","Y29uZmlnLmZyZmlndXJlcy5jb20="];var y="ZnMtYWRiLWVycg",gt=()=>h(void 0,null,function*(){document.body||(yield new Promise(n=>document.addEventListener("DOMContentLoaded",n)));let o=["YWQ=","YmFubmVyLWFk","YmFubmVyX2Fk","YmFubmVyLWFkLWNvbnRhaW5lcg==","YWQtc2lkZXJhaWw=","c3RpY2t5YWRz","aW1wcnRudC1jbnQ="],t=document.createElement("div");t.textContent=Math.random().toString(),t.setAttribute(atob(lt),Math.random().toString());for(let n=0;n<o.length;n++)t.classList.add(atob(o[n]));t.style.display="block",document.body.appendChild(t);let i=window.getComputedStyle(t),e=i==null?void 0:i.display;if(t.remove(),e==="none")throw new Error(y)}),H=(o,t=!1)=>h(void 0,null,function*(){return new Promise((i,e)=>{let n=document.createElement("script");try{n.src=o,n.addEventListener("load",()=>{t?ft(o,i,e):i()}),n.addEventListener("error",()=>{e(y)}),document.head.appendChild(n)}catch(s){e(s)}finally{n.remove()}})}),pt=(...t)=>h(void 0,[...t],function*(o=atob(dt)){return new Promise((i,e)=>{let n=encodeURIComponent(new Date().toISOString().split("Z")[0]),s=document.createElement("img");s.src=`${o}?x=${n}`,s.onload=()=>h(void 0,null,function*(){yield ft(o,i,e),i(),s.remove()}),s.onerror=()=>{e(y),s.remove()},document.body.appendChild(s)})}),ft=(o,t,i)=>h(void 0,null,function*(){try{let e=yield fetch(o),n=e==null?void 0:e.redirected,s=e==null?void 0:e.url;n||(s?s!==o:!1)?i(y):t()}catch(e){i(y)}});var ht="data:image/png;base64,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";var bt="data:image/png;base64,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";var F=class{constructor(t){this.config=null,this.langCode=null,this.languages=this.getUserPreferredLanguages(t)}init(){return h(this,null,function*(){this.config=yield this.fetchConfig(),this.config!==null&&(this.langCode=this.getFirstSupportedLanguage(this.languages),this.observe())})}fetchConfig(){return h(this,null,function*(){let t=ut,i=t.length-1,e=Number.isNaN(Number(localStorage.getItem("fs.cdi")))?0:Number(localStorage.getItem("fs.cdi")),n=Number.isNaN(Number(localStorage.getItem("fs.cfc")))?0:Number(localStorage.getItem("fs.cfc")),d=`https://${atob(t[e])}/untappd-com.json`;try{return(yield fetch(d)).json()}catch(l){return n++,n>=3&&(n=0,e++),e>i&&(e=0),null}finally{localStorage.setItem("fs.cdi",e),localStorage.setItem("fs.cfc",n)}})}killScroll(t){if(t.isScrollDisabled){this.existingOverflow=document.body.style.overflow,document.body.style.overflow="hidden";let i=window.pageYOffset||document.documentElement.scrollTop,e=window.pageXOffset||document.documentElement.scrollLeft;document.body.style.top=`-${i}px`,document.body.style.left=`-${e}px`,window.onscroll=function(){window.scrollTo(e,i)}}}reviveScroll(){document.body.style.overflow=this.existingOverflow||"",window.onscroll=function(){}}getUserPreferredLanguages({languages:t,language:i}){let e=t===void 0?[i]:t;if(e)return e.map(n=>{let s=n.trim().toLowerCase();if(!s.includes("zh"))return s.split(/-|_/)[0];let d=s.split(/-|_/)[1],l=["hans","cn","sg"],u=["hant","hk","mo","tw"];if(s==="zh"||l.includes(d))return"zh";if(u.includes(d))return"zh-hant"})}getFirstSupportedLanguage(t){let i=["title","paragraphOne","buttonText"],e=t.find(n=>i.every(s=>!!this.config[s][n]));return e!==void 0?e:"en"}getLocalizedTextContent(t,i,e=!1){var s;let n=t[i];if(n===void 0)throw new Error(`Config text not found for text key ${i}`);return e?(s=n[this.langCode])!=null?s:n.en:n[this.langCode]}getPixelString(t){return typeof t=="number"?`${t}px`:null}pickContrastingColorValue(t,i,e){let n=t.substring(1,7),s=parseInt(n.substring(0,2),16),d=parseInt(n.substring(2,4),16),l=parseInt(n.substring(4,6),16);return s*.299+d*.587+l*.114>=128?i:e}generateOverlay(t){let{siteId:i,isCloseEnabled:e,dismissDuration:n,dismissDurationPv:s,logoUrl:d,font:l,paragraphTwo:u,paragraphThree:v,closeText:E,linkText:U,linkUrl:O,textColor:T,headerTextColor:S,buttonTextColor:w,headerBgColor:X,bgColor:I,buttonBgColor:L,borderColor:V,borderWidth:vt,borderRadius:xt,closeButtonColor:$,closeTextColor:Q,linkTextColor:Z,linkTextDecoration:j,linkVisitedTextColor:J,hasFsBranding:yt,disableInstructions:_t}=t,g=document.createElement("div");g.style.setProperty("--vot3fy",L||"#40C28A"),g.style.setProperty("--_1lsu7q",w||"#000000"),g.style.setProperty("--_1n05zg8",this.pickContrastingColorValue(I||"#FFFFFF","white","black")),Z&&g.style.setProperty("--_1emtbbe",Z),J&&g.style.setProperty("--_1h4vo4h",J),j&&g.style.setProperty("--g0b7gl",j),g.classList.add("_1bm7ugs"),g.id="ndeb5g",g.dir="auto",this.oid=g.id;let p=document.createElement("div");p.classList.add("ittm5a"),I&&(p.style.backgroundColor=I),l&&(p.style.fontFamily=l),T&&(p.style.color=T);let Y=this.getPixelString(xt),q=this.getPixelString(vt);Y&&(p.style.borderRadius=Y),(V||q)&&(p.style.borderStyle="solid"),V&&(p.style.borderColor=V),q&&(p.style.borderWidth=q);let b=document.createElement("div");if(b.classList.add("_1wmm6xd"),S&&(b.style.color=S),X){b.style.backgroundColor=X;let a=Y||"1em";b.style.borderTopLeftRadius=a,b.style.borderTopRightRadius=a}if(d){let a=document.createElement("img");a.src=d,a.alt="Logo",a.onerror=function(){this.style.display="none"},b.appendChild(a)}let K=document.createElement("h2");K.textContent=this.getLocalizedTextContent(t,"title"),b.appendChild(K);let x=document.createElement("section");x.classList.add("zgt4cb");let tt=document.createElement("p");if(tt.textContent=this.getLocalizedTextContent(t,"paragraphOne"),x.appendChild(tt),u&&Object.keys(u).length!==0){let a=document.createElement("p");a.textContent=this.getLocalizedTextContent(t,"paragraphTwo"),x.appendChild(a)}if(v&&Object.keys(v).length!==0){let a=document.createElement("p");a.textContent=this.getLocalizedTextContent(t,"paragraphThree"),x.appendChild(a)}let et=U&&this.getLocalizedTextContent(t,"linkText"),it=O&&this.getLocalizedTextContent(t,"linkUrl",!0);if(et&&it){let a=document.createElement("div");a.style.margin="0 0 1em";let r=document.createElement("a");r.classList.add("mhlzqc"),Z&&r.classList.add("_1emtbbe"),J&&r.classList.add("_1h4vo4h"),j&&r.classList.add("g0b7gl"),r.textContent=et,r.href=it,r.target="_blank",a.appendChild(r),x.appendChild(a)}let _=document.createElement("button");if(_.classList.add("_10jcka8"),_.tabIndex=0,_.textContent=this.getLocalizedTextContent(t,"buttonText"),L&&(_.style.backgroundColor=L),w&&(_.style.color=w),_.onclick=function(){document.querySelector("section.zgt4cb").classList.add("_15yer7c"),document.querySelector("section.g3f52f").classList.remove("_15yer7c")},x.appendChild(_),e){let a=()=>{if(g.remove(),this.reviveScroll(),!n&&!s){sessionStorage.setItem(`fs.adb${i||""}.dis`,"1");return}sessionStorage.removeItem(`fs.adb${i||""}.dis`),s?this.updateValues("p"):n&&this.updateValues("dt")},r=document.createElement("span");if(r.classList.add("_10cqbyd"),r.innerHTML="&times;",r.tabIndex=0,$&&(r.style.color=$),r.addEventListener("click",a),b.appendChild(r),E&&Object.keys(E).length!==0){let f=document.createElement("div");f.classList.add("axqbiy");let m=document.createElement("p");m.classList.add("_10lak7c"),m.textContent=this.getLocalizedTextContent(t,"closeText"),Q&&(m.style.color=Q),m.addEventListener("click",a),f.appendChild(m),x.appendChild(f)}}let Ct=a=>{let r=document.querySelectorAll("._19i18vc > li"),f=document.getElementsByClassName("_130j852");for(let m=0;m<f.length;m++)r[m].classList.remove("_1lowx25"),f[m].classList.remove("_1lowx25");r[a].classList.add("_1lowx25"),f[a].classList.add("_1lowx25")},k=document.createElement("section");k.classList.add("g3f52f","_15yer7c");let M=document.createElement("h4");M.classList.add("_1e70kqd"),M.textContent=this.getLocalizedTextContent(t,"instructionsTitle");let R=document.createElement("div");R.classList.add("i5jiss");let P=document.createElement("ul");P.classList.add("_19i18vc");let z=document.createElement("div");z.classList.add("_1kebabo"),_t.forEach((a,r)=>{let f=document.createElement("li");f.onclick=()=>Ct(r),f.textContent=this.getLocalizedTextContent(a,"name",!0),P.appendChild(f);let m=document.createElement("ol");m.classList.add("_130j852"),r===0&&(f.classList.add("_1lowx25"),m.classList.add("_1lowx25")),this.getLocalizedTextContent(a,"steps").forEach(Lt=>{let ot=document.createElement("li");ot.textContent=Lt,m.appendChild(ot)}),z.appendChild(m)});let wt=this.getLocalizedTextContent(t,"disclaimerText"),nt=document.createElement("p");nt.textContent=wt,z.appendChild(nt),R.appendChild(P),R.appendChild(z);let C=document.createElement("button");if(C.classList.add("_10jcka8","hrbmcw"),C.textContent=this.getLocalizedTextContent(t,"backButtonText"),L&&(C.style.backgroundColor=L),w&&(C.style.color=w),C.onclick=function(){document.querySelector("section.g3f52f").classList.add("_15yer7c"),document.querySelector("section.zgt4cb").classList.remove("_15yer7c")},k.appendChild(M),k.appendChild(R),k.appendChild(C),p.appendChild(b),p.appendChild(x),p.appendChild(k),yt){let a=document.createElement("a");a.classList.add("_1ahf6lp"),a.href=atob(mt),a.target="_blank";let r=document.createElement("img");r.alt="Logo",r.src=this.pickContrastingColorValue(I||"#FFFFFF",ht,bt),a.appendChild(r),p.appendChild(a)}return g.appendChild(p),g}getAndSetOverlay(t){return h(this,null,function*(){if(this.post(!0,t),!t.dismissDuration&&!t.dismissDurationPv&&sessionStorage.getItem(`fs.adb${t.siteId||""}.dis`)==="1")return;let i=localStorage.getItem("fs.adb"),e=i&&JSON.parse(i);if(t.dismissDurationPv&&e.p&&typeof e.p=="number")if(t.dismissDurationPv<=e.p+1)this.clearValue("p");else{this.updateValues("p");return}else this.clearValue("p");let n=parseInt(e.dt,10);if(t.dismissDuration&&n){if(Math.abs((Date.now()-n)/36e5)<t.dismissDuration)return;this.clearValue("dt")}else this.clearValue("dt");if(document.body||(yield new Promise(d=>document.addEventListener("DOMContentLoaded",d))),this.killScroll(t),document.querySelector(`#${this.oid}`)!==null)return;let s=this.generateOverlay(t);document.body.appendChild(s)})}getStatus(t,i){return i===!0?1:t===2||t===1?2:0}getAndSetData(t){let i=localStorage.getItem("fs.adb"),e=i&&JSON.parse(i),n=Date.now(),s,d,l;return e?(s=e.i,d=e.ot,l=this.getStatus(e.s,t)):(e={},s=B(),d=n,l=t?1:0),e.i=s,e.s=l,e.ot=d,e.lt=n,localStorage.setItem("fs.adb",JSON.stringify(e)),e}updateValues(t){let i=localStorage.getItem("fs.adb"),e=i&&JSON.parse(i);t==="p"?(e.p=e.p?e.p+1:1,e.dt&&delete e.dt):t==="dt"&&(e.dt=Date.now(),e.p&&delete e.p),localStorage.setItem("fs.adb",JSON.stringify(e))}clearValue(t){let i=localStorage.getItem("fs.adb"),e=i&&JSON.parse(i);e[t]&&(delete e[t],localStorage.setItem("fs.adb",JSON.stringify(e)))}post(t,i){let e=atob(ct),s=`https://${i.cDomain||e}/v2/abr`,d=this.getAndSetData(t),{accountId:l,siteId:u}=i,v=navigator.userAgent||window.navigator.userAgent,E=document.referrer,U=window.location,O=S=>{switch(S){case 0:return"not detected";case 1:return"detected";case 2:return"recovered";default:return}},T={accountId:l,siteId:u,userId:d.i,url:U.href,referalURL:E,userAgent:v,status:O(d.s),returning:d.ot!==d.lt,version:"1.4.2"};fetch(s,{method:"POST",headers:{"Content-Type":"application/json","X-Client-Geo-Location":"{client_region},{client_region_subdivision},{client_city}"},body:JSON.stringify(T)}).catch(()=>{})}observe(){let t="",i=new MutationObserver(()=>{location.pathname!==t&&(t=location.pathname,this.run())}),e={subtree:!0,childList:!0};i.observe(document,e)}run(){let t=this.config;setTimeout(()=>h(this,null,function*(){try{yield gt(),yield pt(),yield H(atob(at),!0),yield H(atob(rt),!1),this.post(!1,t)}catch(i){(i===y||(i==null?void 0:i.message)===y)&&(yield this.getAndSetOverlay(t))}}),500)}};var Rt=["googlebot","mediapartners-google","adsbot-google","bingbot","slurp","duckduckbot","baiduspider","yandexbot","konqueror/3.5","Exabot/3.0","facebot","facebookexternalhit/1.0","facebookexternalhit/1.1","ia_archiver"],N=class{constructor(t){this.globalNavigator=t}checkForBot(){let t=this.globalNavigator.userAgent;t&&Rt.forEach(i=>{if(RegExp(i.toLowerCase()).test(t.toLowerCase()))throw new Error("bot detected")})}};var zt=new N(window.navigator);zt.checkForBot();var Dt=new F(window.navigator);Dt.init();})();
+</script>
+
+<script src="https://a.pub.network/untappd-com/pubfig.min.js" data-cfasync="false" async></script>
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js?network-code=15184186" ></script>
+<!-- End Freestar Ads -->
+    <!-- Freestar Ad Sticky Styling: https://resources.freestar.com/docs/sticky-ads-1 -->
+    <style>
+    div.sticky {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 84px; /* Navbar height */
+    }
+    </style>
+
+</head>
+<style type="text/css">
+	.hidden {display: none;}
+	.main {
+       margin-top: 0px !important;
+   }
+</style>
+<script src="https://untappd.com/assets/libs/js/feather-icons@4.29.2.min.js"></script>
+<body onunload="">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N4DVXTR" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('a[data-href=":logout"]').on('click', function(event) {
+            clevertap.event.push("logout");
+        });
+        $('a[data-href=":external/help"]').on('click', function(event) {
+            clevertap.event.push("pageview_help");
+        });
+        $('a[data-href=":store"]').on('click', function(event) {
+            clevertap.event.push("pageview_store");
+        });
+        $('a[href="/admin"]').on('click', function(event) {
+          clevertap.event.push("pageview_admin");
+        });
+
+            });
+</script>
+<div id="mobile_nav_user">
+
+   </div>
+
+<div id="mobile_nav_site">
+  <form class="search_box" method="get" action="/search">
+    <input type="text" class="track-focus search-input-desktop" autocomplete="off" data-track="desktop_search" placeholder="Find a drink, brewery or bar..." name="q" aria-label="Find a drink, brewery or bar search" />
+    <input type="submit" value="Submit the form!" style="position: absolute; top: 0; left: 0; z-index: 0; width: 1px; height: 1px; visibility: hidden;" />
+    <div class="autocomplete">
+    </div>
+  </form>
+  <ul>
+    <li><a class="track-click" data-track="mobile_menu" data-href=":blog" href="/blog">Blog</a></li>
+    <li><a class="track-click" data-track="mobile_menu" data-href=":beer/top_rated" href="/beer/top_rated">Top Rated</a></li>
+    <li><a class="track-click" data-track="mobile_menu" data-href=":supporter" href="/supporter">Insiders</a></li>
+    <li><a class="track-click" data-track="mobile_menu" data-href=":external/help" target="_blank" href="http://help.untappd.com">Help</a></li>
+    <li><a class="track-click" data-track="mobile_menu" data-href=":shop" target="_blank" href="https://untappd.com/shop">Shop</a></li>
+          <li><a class="track-click" data-track="mobile_menu" data-href=":sidebar/login" href="/login">Login</a></li>
+      <li><a class="track-click" data-track="mobile_menu" data-href=":sidebar/create" href="/create?source=mobilemenu">Sign Up</a></li>
+        </ul>
+</div>
+<header>
+
+  <div class="inner mt-2">
+
+		<a class="track-click logo" style="margin-top: 2px;" data-track="desktop_header" data-href=":root" href="/">
+			<img src="https://untappd.com/assets/design-system/ut-brand-dark.svg" class="" alt="Untappd"/>
+		</a>
+
+    
+      <div class="get_user_desktop">
+        <a class="sign_in track-click" data-track="mobile_header" data-href=":login" href="/login?go_to=https://untappd.com/search">Sign In</a>
+        <a href="/create" class="join track_click" data-track="mobile_header" data-href=":create">Join Now</a>
+      </div>
+
+    
+    <div class="mobile_menu_btn">Menu</div>
+
+    <div id="nav_site">
+      <ul>
+        <li><a class="track-click" data-track="desktop_menu" data-href=":blog" href="/blog">Blog</a></li>
+        <li><a class="track-click" data-track="desktop_menu" data-href=":beer/top_rated" href="/beer/top_rated">Top Rated</a></li>
+        <li><a class="track-click" data-track="desktop_menu" data-href=":supporter" href="/supporter">Insiders</a></li>
+        <li><a class="track-click" data-track="desktop_menu" data-href=":external/help" target="_blank" href="http://help.untappd.com">Help</a></li>
+        <li><a class="track-click" data-track="desktop_menu" data-href=":shop" target="_blank" href="https://untappd.com/shop">Shop</a></li>
+      </ul>
+      <form class="search_box" method="get" action="/search">
+        <input type="text" class="track-focus search-input-desktop" autocomplete="off" data-track="desktop_search" placeholder="Find a drink, brewery or bar..." name="q" aria-label="Find a drink, brewery or bar search" />
+        <input type="submit" value="Submit the form!" style="position: absolute; top: 0; left: 0; z-index: 0; width: 1px; height: 1px; visibility: hidden;" />
+        <div class="autocomplete">
+        </div>
+      </form>
+    </div>
+    </div>
+</header>
+<style type="text/css">
+    .ac-selected {
+        background-color: #f8f8f8;
+    }
+</style>
+
+<div class="nav_open_overlay"></div>
+<div id="slide">
+
+<script>
+$(document).ready(() => {
+	$(".hide-notice-banner").on("click", function(e) {
+		e.preventDefault();
+		$(this).parent().parent().slideUp();
+		$.post(`/account/hide_notice_wildcard`, {cookie: $(this).attr('data-cookie-name')}, (data) => {
+			console.log(data);
+		}).fail((err) => {
+			console.error(err);
+		})
+	})
+
+	$(".hide-notice-simple").on("click", function(e) {
+		e.preventDefault();
+		$(this).parent().parent().slideUp();
+	})
+
+	feather.replace()
+})
+</script>
+	<div class="leaderboard-ad">
+		<div style="text-align: center;" data-freestar-ad="__336x280 __728x90" id="untappd-com_leaderboard-atf">
+			<script data-cfasync="false" type="text/javascript">
+				freestar.config.enabled_slots.push({ placementName: "untappd-com_leaderboard-atf", slotId: "untappd-com_leaderboard-atf" });
+			</script>
+		</div>
+	</div>
+	<style>
+	.menu-offerings {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		max-width: 100vw;
+	}
+
+	.offerings-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.offerings-badge {
+		height: 24px;
+		min-width: 24px;
+		border-radius: 50px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.offerings-badge.beer { background-color: #FFF6DE; }
+	.offerings-badge.spirits { background-color: #E5F2FC; }
+	.offerings-badge.food { background-color: #E6F7E5; }
+	.offerings-badge.wines { background-color: #F3E0DF; }
+
+</style>
+<div class="cont search-page">
+	<div class="main">
+		<div class="box">
+			<div class="results content">
+				<div class="search">
+					<form action="/search" method="get" id="algolia-search-form">
+						<input type="text" id="search-term" name="q" aria-label="Search" placeholder="Search beers, breweries &amp; venues..." value="sierra nevada pale ale"><span class="button yellow">Search<input type="submit" aria-label="search button"></span>
+						<input type="hidden" id="page-type" name="type" value="beer" />
+						<input type="hidden" id="sort-type" name="sort" value="all" />
+					</form>
+				</div>
+
+				<div class="filter" id="algolia-type-filter">
+					<a href="#" data-filter="beer" class="active section-toggle track-click" data-track="search" data-type="beer" data-href=":beer_toggle">Drink</a><a data-filter="brewery" class="section-toggle track-click" data-track="search" data-type="beer" data-href=":brewery_toggle" href="#">Brewery</a><a data-filter="venues" class="section-toggle track-click" data-track="search" data-type="beer" data-href=":venue_toggle" href="#">Venue</a>
+				</div>
+
+				<div class="result-list beer-list">
+					<div class="results-list-top" id="algolia-results-top" style="display: none;">
+						<p class="total" id="algolia-stats"></p>
+						<div class="sort" id="algolia-sort-wrapper">
+							<p>
+								Sort by:
+								<select id="sort_picker" data-type="beer" aria-label="Sort by selection"></select>
+							</p>
+						</div>
+					</div>
+
+					<div id="algolia-empty-prompt" class="result-list beer-list" style="display: none;">
+						<p style="text-align: center; margin-top: 20px; font-weight: 600; font-size: 17px;">Use the Search Box above to search for a Drink.</p>
+					</div>
+
+					<div class="results-container" id="algolia-hits"></div>
+					<div id="algolia-add-beer"></div>
+					<div id="algolia-login-gate"></div>
+					<div id="algolia-show-more"></div>
+					<p class="stream-loading" id="algolia-stream-loading"><span></span></p>
+				</div>
+			</div>
+			    <div style="text-align: center;" data-freestar-ad="__240x400 __336x280" id="untappd-com_untappd_bottom">
+        <script data-cfasync="false" type="text/javascript">
+            freestar.config.enabled_slots.push({ placementName: "untappd-com_untappd_bottom", slotId: "untappd-com_untappd_bottom" });
+        </script>
+    </div>
+	
+		</div>
+	</div>
+
+	<div class="sidebar">
+			<div class="box">
+		<div style="text-align: center;" data-freestar-ad="__336x280" id="untappd-com_untappd_siderail_right_atf">
+			<script data-cfasync="false" type="text/javascript">
+				freestar.config.enabled_slots.push({ placementName: "untappd-com_untappd_siderail_right_atf", slotId: "untappd-com_untappd_siderail_right_atf" });
+			</script>
+		</div>
+	</div>
+	        <div class="box">
+            <div class="content">
+                <h3>Global Top Beers</h3>                    <div class="item">
+                        <a href="/b/guinness-guinness-draught/4473" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-4473_1cbe8_sm.jpeg" alt="Guinness Draught label">
+                            </p><p class="text">
+                                <span class="name">Guinness Draught</span>
+                                <span class="brewery">Guinness</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/grupo-modelo-corona-extra/5848" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-5848_e34c0_sm.jpeg" alt="Corona Extra label">
+                            </p><p class="text">
+                                <span class="name">Corona Extra</span>
+                                <span class="brewery">Grupo Modelo</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/stella-artois-stella-artois/4010" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-4010_5da67_sm.jpeg" alt="Stella Artois label">
+                            </p><p class="text">
+                                <span class="name">Stella Artois</span>
+                                <span class="brewery">Stella Artois</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/heineken-heineken/5860" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-5860_a68ef_sm.jpeg" alt="Heineken label">
+                            </p><p class="text">
+                                <span class="name">Heineken</span>
+                                <span class="brewery">Heineken</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/grupo-modelo-modelo-especial/6277" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-6277_5ffcb_sm.jpeg" alt="Modelo Especial label">
+                            </p><p class="text">
+                                <span class="name">Modelo Especial</span>
+                                <span class="brewery">Grupo Modelo</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/birra-moretti-birra-moretti-l-autentica-ricetta-originale/6347" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-6347_a13ce_sm.jpeg" alt="Birra Moretti L'Autentica / Ricetta Originale label">
+                            </p><p class="text">
+                                <span class="name">Birra Moretti L'Autentica / Ricetta Originale</span>
+                                <span class="brewery">Birra Moretti</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/asahi-breweries-asahi-super-dry/8020" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-8020_a6231_sm.jpeg" alt="Asahi Super Dry label">
+                            </p><p class="text">
+                                <span class="name">Asahi Super Dry</span>
+                                <span class="brewery">Asahi Breweries</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/plzensky-prazdroj-pilsner-urquell/37936" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-37936_91585_sm.jpeg" alt="Pilsner Urquell label">
+                            </p><p class="text">
+                                <span class="name">Pilsner Urquell</span>
+                                <span class="brewery">Plzeňský Prazdroj</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/anheuser-busch-budweiser/3783" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-3783_b208c_sm.jpeg" alt="Budweiser label">
+                            </p><p class="text">
+                                <span class="name">Budweiser</span>
+                                <span class="brewery">Anheuser-Busch</span>                            </p>
+                        </a>
+                    </div>
+                                        <div class="item">
+                        <a href="/b/birra-peroni-nastro-azzurro/7427" class="track-click" data-track="sidebar" data-href=":beer/toplist">
+                            <p class="logo">
+                                    <img src="https://assets.untappd.com/site/beer_logos/beer-7427_57d7c_sm.jpeg" alt="Nastro Azzurro label">
+                            </p><p class="text">
+                                <span class="name">Nastro Azzurro</span>
+                                <span class="brewery">Birra Peroni</span>                            </p>
+                        </a>
+                    </div>
+                                </div>
+        </div>
+            	<div class="box">
+        	<div class="content">
+                <h3>Trending Locations</h3>                    <div class="item" data-track-venue-impression="venue_id-9917985-type-trending_locations">
+                        <a href="/v/at-home/9917985" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                <span>Verified</span>                                <img src="https://assets.untappd.com/venuelogos/venue_9917985_b3a5d245_bg_176.png?v=1" alt="Untappd at Home logo">
+                            </p><p class="text">
+                                <span class="name">Untappd at Home</span>
+
+                                <span class="location">United States</span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-298030-type-trending_locations">
+                        <a href="/v/safaripark-beekse-bergen/298030" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/arts_entertainment/zoo_bg_512.png" alt="Safaripark Beekse Bergen logo">
+                            </p><p class="text">
+                                <span class="name">Safaripark Beekse Bergen</span>
+
+                                <span class="location">Hilvarenbeek, Noord-Brabant                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-11211240-type-trending_locations">
+                        <a href="/v/bierfestival-de-24-uurs-van-maastricht/11211240" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                <span>Verified</span>                                <img src="https://images.untp.beer/resize?width=176&height=176&background=255,255,255&extend=white&stripmeta=true&url=https://utfb-images.untappd.com/ziafskkp0aw34eofhn41z3kdlbok?auto=compress" alt="Bierfestival De 24 Uurs van Maastricht logo">
+                            </p><p class="text">
+                                <span class="name">Bierfestival De 24 Uurs van Maastricht</span>
+
+                                <span class="location">Maastricht, Limburg                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-18755-type-trending_locations">
+                        <a href="/v/toppling-goliath-brewing-co/18755" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/food/brewery_bg_512.png" alt="Toppling Goliath Brewing Co. logo">
+                            </p><p class="text">
+                                <span class="name">Toppling Goliath Brewing Co.</span>
+
+                                <span class="location">Decorah, IA                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-1798969-type-trending_locations">
+                        <a href="/v/bauhaus-brew-labs/1798969" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/food/brewery_bg_512.png" alt="Bauhaus Brew Labs logo">
+                            </p><p class="text">
+                                <span class="name">Bauhaus Brew Labs</span>
+
+                                <span class="location">Minneapolis, MN                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-7665570-type-trending_locations">
+                        <a href="/v/great-notion-brewing/7665570" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/food/brewery_bg_512.png" alt="Great Notion Brewing logo">
+                            </p><p class="text">
+                                <span class="name">Great Notion Brewing</span>
+
+                                <span class="location">Portland, OR                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-5045090-type-trending_locations">
+                        <a href="/v/tree-house-brewing-co/5045090" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                <span>Verified</span>                                <img src="https://images.untp.beer/resize?width=176&height=176&background=255,255,255&extend=white&stripmeta=true&url=https://utfb-images.untappd.com/iffgnpeigt87bb0ryjjbi927j48v?auto=compress" alt="Tree House Brewing Co. logo">
+                            </p><p class="text">
+                                <span class="name">Tree House Brewing Co.</span>
+
+                                <span class="location">Charlton, MA                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-36635-type-trending_locations">
+                        <a href="/v/miller-park-american-family-field/36635" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_baseball_bg_512.png" alt="Miller Park (American Family Field) logo">
+                            </p><p class="text">
+                                <span class="name">Miller Park (American Family Field)</span>
+
+                                <span class="location">Milwaukee, WI                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-10053-type-trending_locations">
+                        <a href="/v/arrowhead-stadium-geha-field-at-arrowhead-stadium/10053" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_football_bg_512.png" alt="Arrowhead Stadium (GEHA Field at Arrowhead Stadium) logo">
+                            </p><p class="text">
+                                <span class="name">Arrowhead Stadium (GEHA Field at Arrowhead Stadium)</span>
+
+                                <span class="location">Kansas City, MO                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			                    <div class="item" data-track-venue-impression="venue_id-1066902-type-trending_locations">
+                        <a href="/v/wisconsin-brewing-company/1066902" class="track-click" data-track="sidebar" data-href=":venue/toplist">
+                            <p class="logo">
+                                                                <img src="https://ss3.4sqi.net/img/categories_v2/food/brewery_bg_512.png" alt="Wisconsin Brewing Company logo">
+                            </p><p class="text">
+                                <span class="name">Wisconsin Brewing Company</span>
+
+                                <span class="location">Verona, WI                                        </span>                            </p>
+                        </a>
+                    </div>
+
+        			        	</div>
+    	</div>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                createImpressionTracker();
+            });
+        </script>
+    		<div class="sticky">
+		<div style="text-align: center;" data-freestar-ad="__300x600" id="untappd-com_untappd_siderail_right_sticky">
+			<script data-cfasync="false" type="text/javascript">
+				freestar.config.enabled_slots.push({ placementName: "untappd-com_untappd_siderail_right_sticky", slotId: "untappd-com_untappd_siderail_right_sticky" });
+			</script>
+		</div>
+	</div>
+		</div>
+
+	<div class="add-beer-lightbox" style="display: none; position: fixed; background: #fff; z-index: 150;">Loading...</div>
+	<div class="facybox_hide facybox_overlayBG" id="facybox_overlay" style="display: none; opacity: 0.3;"></div>
+</div>
+
+<script>
+window.UNTAPPD_SEARCH_CONFIG = {"appId":"9WBO4RQ3HO","searchKey":"1d347324d67ec472bb7132c66aead485","autocompleteAppId":"9WBO4RQ3HO","autocompleteSearchKey":"61401542b9f2600ef4ae589e9ec97521","initialQuery":"sierra nevada pale ale","initialRawQuery":"sierra nevada pale ale","initialType":"beer","initialSort":"all","loggedIn":false,"hitsPerPage":5,"assetsBase":"https:\/\/untappd.com\/assets","indexes":{"beer":{"all":"beer","beer_name_asc":"beer_order_by_beer_name","beer_name_desc":"beer_order_by_beer_name_desc","brewery":"beer_order_by_brewery_name","highest_abv":"beer_order_by_abv_desc","lowest_abv":"beer_order_by_abv"},"brewery":{"all":"brewery","brewery_name_asc":"brewery_order_by_brewery_name","brewery_name_desc":"brewery_order_by_brewery_name_desc"},"venues":{"all":"venue","popular_recent":"venue_order_by_recent_popularity","venue_name_asc":"venue_order_by_venue_name","venue_name_desc":"venue_order_by_venue_name_desc"},"beerExact":"beer_exact"},"sortOptions":{"beer":[{"value":"all","label":"Most Popular"},{"value":"beer_name_asc","label":"Beer Name (Asc)"},{"value":"beer_name_desc","label":"Beer Name (Desc)"},{"value":"brewery","label":"Brewery Name"},{"value":"highest_abv","label":"Highest ABV"},{"value":"lowest_abv","label":"Lowest ABV"}],"brewery":[{"value":"all","label":"Popularity"},{"value":"brewery_name_asc","label":"Brewery Name (Asc)"},{"value":"brewery_name_desc","label":"Brewery Name (Desc)"}],"venues":[{"value":"all","label":"Popularity (All-Time)"},{"value":"popular_recent","label":"Popularity (Recent)"},{"value":"venue_name_asc","label":"Venue Name (Asc)"},{"value":"venue_name_desc","label":"Venue Name (Desc)"}]}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script type="text/javascript" language="Javascript" src="https://untappd.com/assets/v3/js/search-algolia.js?v=2.8.39"></script>
+<style>
+#pmLink {
+	visibility: hidden;
+    color: #8a4500;
+    font: inherit;
+    line-height: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+#pmLink:hover {
+	visibility: visible;
+    color: #c60;
+}
+</style>
+
+	<footer class="has-bottom-ad">
+		<div class="footer-nav">
+			<div class="footer-inner">
+				<ul>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/businesses" href="https://utfb.untappd.com/">Untappd for Business</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/businesses/blog" href="https://lounge.untappd.com/">Untappd for Business Blog</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/breweries" href="https://untappd.com/breweries">Breweries</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/shop" href="https://untappd.com/shop">Shop</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/support" href="http://help.untappd.com/">Support</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/careers" href="/careers">Careers</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/api" href="/api/">API</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/terms" href="/terms">Terms</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/privacy" href="/privacy">Privacy</a>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/cookie" href="/cookie">Cookie Policy</a>
+					</li>
+					<li>
+						<!-- https://freestarhelp.zendesk.com/hc/en-us/articles/34424330233364-Freestar-Sourcepoint-CMP-Implementation -->
+						<button id="pmLink">Privacy Manager</button>
+					</li>
+					<li>
+						<a class="track-click" data-track="footer" data-href=":footer/personal_data" href="/privacy/personal-data">Manage Personal Data</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<ul class="social">
+    <li><a class="track-click" data-track="footer" data-href=":footer/social/twitter" href="https://bit.ly/3T6pKK6" target="_blank"><img src="https://untappd.com/assets/custom/homepage/images/icon-twitter.svg" alt="Icon twitter" /></a></li>
+    <li><a class="track-click" data-track="footer" data-href=":footer/social/facebook" href="https://bit.ly/3RVLffu" target="_blank"><img src="https://untappd.com/assets/custom/homepage/images/icon-facebook.svg" alt="Icon facebook" /></a></li>
+    <li><a class="track-click" data-track="home" data-href=":footer/social/instagram" href="https://bit.ly/3EyG9D5" target="_blank"><img src="https://untappd.com/assets/custom/homepage/images/icon-instagram.svg" alt="Icon instagram" /></a></li>
+</ul>	</footer>
+
+<script type="text/javascript">
+	// polyfill for ie11
+	function getUrlParameter(name) {
+		name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+		var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+		var results = regex.exec(location.search);
+		return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+	};
+
+	$(document).ready(function() {
+		// remove any access tokens, preserve other elements
+		if (history.replaceState) {
+			if (location.href.indexOf("access_token=") >= 0) {
+				const accessTokenURL = getUrlParameter("access_token");
+				let currentURL = location.href;
+				let finalURL = currentURL.replace(`access_token=${accessTokenURL}`, '');
+
+				// if the url has a "&" already in it, then remove the "?" and replace the first "&" with an "?"
+				if (finalURL.indexOf("&") >= 0) {
+					finalURL = finalURL.replace("?", "").replace("&", "?");
+				} else {
+					finalURL = finalURL.split("?")[0];
+				}
+
+				history.replaceState(null, "", finalURL);
+			}
+		}
+	})
+</script>
+
+<script type="text/javascript">
+	// Clear Text Feild
+	function clearText(thefield) {
+		if (thefield.defaultValue == thefield.value)
+			thefield.value = ""
+	}
+</script>
+
+
+</body>
+</html>

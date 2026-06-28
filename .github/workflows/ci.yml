@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup component add rustfmt clippy
+          rustup target add wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all --check
+
+      - name: Clippy (host)
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Clippy (native dev runner)
+        run: cargo clippy --features native --bin b30-dev -- -D warnings
+
+      - name: Clippy (wasm worker)
+        run: cargo clippy --target wasm32-unknown-unknown -- -D warnings
+
+      - name: Test (host)
+        run: cargo test
+
+      - name: Build wasm + size budget
+        run: |
+          cargo build --target wasm32-unknown-unknown --release
+          WASM=target/wasm32-unknown-unknown/release/lib.wasm
+          GZ=$(gzip -9 -c "$WASM" | wc -c)
+          echo "gzipped wasm: $GZ bytes"
+          # Cloudflare free tier limit is 1 MiB compressed. Fail if we exceed it.
+          # (This is the pre-wasm-opt size; the deployed artifact is smaller.)
+          if [ "$GZ" -gt 1048576 ]; then
+            echo "::error::wasm exceeds 1 MiB compressed budget ($GZ bytes)"
+            exit 1
+          fi

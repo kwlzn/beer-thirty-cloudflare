@@ -3,27 +3,46 @@ name = "beer-thirty-worker"
 version = "0.1.0"
 edition = "2021"
 
-[build]
-target = "wasm32-unknown-unknown"
-
 [lib]
 name = "lib"
 path = "b30/lib.rs"
-crate-type = ["cdylib"]
+# cdylib: the wasm artifact for the Worker. rlib: so the native dev bin can link the lib.
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "b30-dev"
+path = "b30/bin/dev.rs"
+required-features = ["native"]
 
 [profile.release]
 lto = true
-strip = true
+# NOTE: do NOT set `strip = true` here. It strips the wasm `reference-types`
+# target feature / externref table that wasm-bindgen needs for its catch
+# wrappers, breaking `worker-build` with "externref table required for catch
+# wrappers" (cloudflare/workers-rs#1014). worker-build's `wasm-opt -Oz` pass
+# strips debug info anyway, so the deployed artifact stays small.
 codegen-units = 1
 opt-level = "z"
 
+[features]
+# Native dev runner (full pipeline against live sites, no deploy).
+native = ["dep:reqwest"]
+
 [dependencies]
+# Cross-platform (used by the pure parsing/rendering modules).
 chrono = "0.4.38"
-futures = "0.3"
 regex = { version = "1.11.1", default-features = false, features = ["std", "unicode-perl"] }
-polars-core = "0.34.2"
 serde_json = "1.0"
-tokio = { version = "1.41.1", default-features = false, features = ["macros", "rt"] }
-worker = "0.4.2"
-worker-kv = "0.7.0"
 url = "2.3"
+
+# wasm-only Cloudflare Worker runtime (KV via the built-in `kv` feature) + async stream helpers.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+futures = "0.3"
+worker = "0.8.5"
+
+# Native-only HTTP client for the dev runner.
+[dependencies.reqwest]
+version = "0.12"
+optional = true
+default-features = false
+features = ["blocking", "rustls-tls", "json"]

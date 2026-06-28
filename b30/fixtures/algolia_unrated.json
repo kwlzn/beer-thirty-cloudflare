@@ -1,0 +1,13 @@
+{
+ "hits": [
+  {
+   "beer_name": "Sun Fade",
+   "brewery_name": "Ghost Town Brewing",
+   "rating_score": 0,
+   "rating_count": 3,
+   "beer_slug": "ghost-town-brewing-sun-fade",
+   "bid": 6755584
+  }
+ ],
+ "nbHits": 1
+}

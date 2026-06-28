@@ -1,0 +1,4 @@
+# worker-build's wasm-bindgen step needs an externref table for its catch
+# wrappers; enable reference-types for the wasm target so the build packages.
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+reference-types,+multivalue"]

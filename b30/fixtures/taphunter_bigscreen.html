@@ -1,0 +1,261 @@
+<!--
+
+	Beer Thirty
+
+	* 30 taps in 3 columns
+	* sorted by tap number
+	* Uses the Android Dongle
+	* iFramed on http://www.bthirty.com/
+
+	-->
+
+<html>
+<head>
+	<link href='//fonts.googleapis.com/css?family=Delius|Actor' rel='stylesheet' type='text/css'>
+	<style type="text/css">
+		* {
+			font-family: 'Actor', sans, "Droid Sans", sans-serif;
+			font-size: 2.314815vh;
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			display: flex;
+			flex-direction: column;
+			color: #ffffff;
+			background:#000000 url('//storage.googleapis.com/custombeerboards-backgrounds/beer-thirty.jpg') no-repeat left top;
+			/*background-color: #000000;*/
+			background-size: 100% 100%;
+			width: 100vw;
+			height: 99.074074vh;
+		}
+		#beerDiv {
+			margin: 0.462963vh 0.520833vw 0;
+			width: 98.958333vw;
+		}
+		.beerBox {
+			width: 31.250000vw;
+			margin: 0.277778vh 0.520833vw;
+			padding: 0.185185vh 0 0.185185vh;
+			float: left;
+			/*
+			border-top: grey 1px solid;
+			background: url('/static/images/display/empty-chalkboard-tile.jpg') repeat left top;
+			border-radius: 15px;
+			-moz-border-radius: 15px;
+			border: 2px solid #893D00;*/
+		}
+		.category {
+			clear: both;
+			width: 100%;
+		}
+		#beerTable {
+			margin: 0.462963vh 1.562500vw 0;
+			width: 96.875000vw;
+			border-collapse: collapse;
+			display: table;
+		}
+		#beerTable tr td {
+			/*border-bottom: 2px solid white !important;*/
+			padding: 0.370370vh 0.208333vw;
+		}
+		#beerTable tr td.linerow {
+			padding: 0.277778vh 0.156250vw;
+		}
+		#beerTable .headerrow td {
+			color: #FCEE21;
+		}
+		td {
+			vertical-align: bottom;
+		}
+		.beer-info {
+			display: inline-block;
+			overflow: hidden;
+			/*height: 48px;*/
+			margin-left: 0.260417vw;
+		}
+		.beer {
+			font-family: 'Delius', sans, "Droid Sans", sans-serif;
+			width: 24vw;
+			color: #FCEE21;
+			height: 3.333333vh;
+		}
+		.style {
+			width: 22.395833vw;
+			font-size: 2.129630vh;
+			height: 2.592593vh;
+		}
+		.abv {
+			/*width: 100px;*/
+			/*width: 174px;*/
+			text-align: right;
+		}
+		.pricing {
+			width: 7.812500vw;
+			float: right;
+			font-size: 2.129630vh;
+			height: 5.185185vh;
+			text-align: right;
+			line-height: 2.685185vh;
+		}
+		.small-super {
+			font-size: 2.222222vh;
+			vertical-align:text-top;
+		}
+		.supersuper-small {
+			font-size: 1.296296vh;
+		}
+		#refreshed {
+			float: left;
+			width: 41.666667vw;
+			text-align: left;
+			margin-top: 0.925926vh;
+			clear: both;
+			opacity: 0;
+		}
+		#refreshed.error {
+			opacity: 1;
+			color: red;
+		}
+		#message {
+			width: 100%;
+			position:absolute;
+			left: 0;
+			top: 97.222222vh;
+		}
+		#message a {
+			color: #dedede;
+			font-size: 2.222222vh;
+			text-decoration: none;
+		}
+		.ibu, .size-3oz, .size-16oz, .size-32oz, .size-64oz {
+			padding-left: 0.416667vw;
+			text-align: right;
+		}
+		.error {
+			color: red;
+		}
+		.linerow {
+			height: 1px;
+			clear: both;
+			/*border-top: grey 1px solid;*/
+			width: 98%;
+		}
+
+	</style>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="/static/js/jquery.fitTextToHeight.js"></script>
+	<script src="/static/js/jquery.url.min.js"></script>
+	<script type="text/javascript">
+		// Google Analytics
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-8374386-13', 'taphunter.com');
+		ga('send', 'pageview');
+
+		function getPriceBySize(list, val){
+			var result = '-';
+			$.each(list, function(index, item){
+				if(item['size'].toString() == val.toString()){
+					result = item['price'];
+					return false;
+				}
+			});
+			return result;
+		}
+		function sortJSONByCategory(data) {
+			return data.sort(function(a, b) {
+				var x = ((a['category']['order'] == '') ? 100000 : parseInt(a['category']['order']));
+				var y = ((b['category']['order'] == '') ? 100000 : parseInt(b['category']['order']));
+				return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+			});
+		}
+		function sortJSONByTapNumber(a,b) {
+			var x = (((!a['serving_info']['tap_number']) || a['serving_info']['tap_number'] == '') ? 100000 : parseInt(a['serving_info']['tap_number']));
+			var y = (((!b['serving_info']['tap_number']) || b['serving_info']['tap_number'] == '') ? 100000 : parseInt(b['serving_info']['tap_number']));
+			return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+		}
+
+		$(document).ready(function() {
+			buildTable();
+		});
+		function buildTable() {
+			$.getJSON('./json/ahJzfnRoZXRhcGh1bnRlci1ocmRyHwsSEnRhcGh1bnRlcl9sb2NhdGlvbhiAgIDYsMrbCQw', function(beers) {
+				beers.sort(sortJSONByTapNumber);
+				var blankBox = { blank: true };
+				var orderedBeers = [];
+				for (var i = 0; i < 30; i++) {
+					orderedBeers.push(blankBox);
+				}
+				for (var i = 0; i < beers.length; i++) {
+					if (beers[i].serving_info.tap_number && orderedBeers[parseInt(beers[i].serving_info.tap_number)-1].blank) {
+						orderedBeers[parseInt(beers[i].serving_info.tap_number)-1] = beers[i];
+					}
+				}
+				beers = orderedBeers;
+				$('#beerDiv').html('');
+				var rowsPerCol = Math.ceil(beers.length/3);
+				for (var i = 0; i < rowsPerCol; i++) {
+					for (var j = 0; (i+j) < beers.length; j+=rowsPerCol) {
+						if (beers[i+j].blank) {
+							$('#beerDiv').append('<div class="beerBox"><div class="beer-info beer">'+(i+j+1)+'.</div><div class="beer-info style"></div><div class="beer-info style"></div></div>');
+							continue;
+						}
+						var pricing = [];
+						for (var pr = 0; pr < beers[i+j].serving_info.sized_pricing.length; pr++) {
+							pricing.push(beers[i+j].serving_info.sized_pricing[pr].size + ' &nbsp; ' + beers[i+j].serving_info.sized_pricing[pr].price);
+							if (pricing.length > 2) {
+								break;
+							}
+						}
+						$('#beerDiv').append(
+							'<div class="beerBox">'
+							+'<div class="beer-info beer">'+((beers[i+j].serving_info.tap_number) ? beers[i+j].serving_info.tap_number+'. ' : '')+beers[i+j].beer.name+'</div>'
+							+'<div class="pricing">'
+							+(pricing.join('<br />'))
+							+'</div>'
+							+'<div class="beer-info style">'+((beers[i+j].beer.style) ? beers[i+j].beer.style : '')
+							+((beers[i+j].beer.abv) ? (' &nbsp;&nbsp;&nbsp; '+beers[i+j].beer.abv+'%') : ' ')
+							+((beers[i+j].serving_info.type == 'Nitro') ? (' &nbsp;&nbsp;&nbsp; *On Nitro*') : ' ')
+							+'</div>'
+							+'<div class="beer-info style">'
+							+((beers[i+j].brewery.origin) ? beers[i+j].brewery.origin : ' ')
+							+'</div>'
+							/*+'<div class="linerow"></div>'*/
+							+'</div>'
+						);
+					}
+					$('#beerDiv').append('<div class="linerow"></div>');
+				}
+				$('.beer').fitToHeight({ minFontSize: 1});
+				$('.style').fitToHeight({ minFontSize: 1});
+				$('#refreshed').html('Refreshed '+Date());
+				$('#refreshed').removeClass('error');
+			})
+			.error(function() {
+				$('#refreshed').html('Refresh failed at '+Date());
+				$('#refreshed').addClass('error');
+			});
+			var t = setTimeout(buildTable, 300000);
+		}
+	</script>
+	<script src="/static/bigscreen/control.js"></script>
+</head>
+<body>
+
+	<div id="beerDiv" ></div>
+	<div id="refreshed" class="supersuper-small"></div>
+	<div id="message">
+		<div style="width: 31.250000vw; margin-left: 1.041667vw; display: inline-block; text-align: center; font-size: 1.851852vh; font-style: italic;">
+			A 20% gratuity will be added to all open tabs and parties of 8 or more.
+		</div>
+		<div style="width: 31.250000vw; display: inline-block; text-align: center;">
+			<a href="http://www.beerthirtysantacruz.com/">beerthirtysantacruz.com</a>
+		</div>
+
+	</div>
+
+</body>
+</html>
